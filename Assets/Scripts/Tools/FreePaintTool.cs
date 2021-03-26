@@ -67,6 +67,7 @@ public class FreePaintTool : BaseTool {
     m_PaintingActive = !m_EatInput && !m_ToolHidden && brushTriggerRatio > 0;
     PointerManager.m_Instance.EnableLine(m_PaintingActive);
     PointerManager.m_Instance.PointerPressure = InputManager.Brush.GetTriggerRatio();
+      Debug.Log(InputManager.Wand.GetTriggerRatio());
   }
 
   override public void LateUpdateTool() {
