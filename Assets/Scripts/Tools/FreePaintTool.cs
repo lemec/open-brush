@@ -24,10 +24,14 @@ public class FreePaintTool : BaseTool {
   [SerializeField] private float m_HapticSizeDown;
 
   private bool m_PaintingActive;
+  private bool m_BimanualTape;
+  private Vector3 m_btCursorPos;
+  private Quaternion m_btCursorRot;
 
-  override public void Init() {
+    override public void Init() {
     base.Init();
     m_PaintingActive = false;
+      m_BimanualTape = false;
   }
 
   public override bool ShouldShowPointer() {
@@ -52,11 +56,14 @@ public class FreePaintTool : BaseTool {
     // Don't call base.UpdateTool() because we have a different 'stop eating input' check
     // for FreePaintTool.
     float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+    float wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
+
     if (m_EatInput) {
-      if (brushTriggerRatio <= 0.0f) {
+      if (brushTriggerRatio <= 0.0f && !(m_BimanualTape || wandTriggerRatio <= 0.0f)) {
         m_EatInput = false;
       }
     }
+
     if (m_ExitOnAbortCommand &&
         InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.Abort)) {
       m_RequestExit = true;
@@ -64,13 +71,31 @@ public class FreePaintTool : BaseTool {
 
     PositionPointer();
 
-    m_PaintingActive = !m_EatInput && !m_ToolHidden && brushTriggerRatio > 0;
+    bool paintingActiveOld = m_PaintingActive;
+
+
+    m_PaintingActive = !m_EatInput && !m_ToolHidden && (brushTriggerRatio > 0 || (m_BimanualTape && wandTriggerRatio > 0));
+
+      if (m_PaintingActive && !paintingActiveOld && wandTriggerRatio > 0)
+        BeginBimanualTape();
+      else if (brushTriggerRatio <= 0 && wandTriggerRatio <= 0)
+        m_BimanualTape = false;
+
     PointerManager.m_Instance.EnableLine(m_PaintingActive);
     PointerManager.m_Instance.PointerPressure = InputManager.Brush.GetTriggerRatio();
-      Debug.Log(InputManager.Wand.GetTriggerRatio());
+    
   }
 
-  override public void LateUpdateTool() {
+  private void BeginBimanualTape()
+  {
+    m_BimanualTape = true;
+    Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
+
+    m_btCursorPos = rAttachPoint.position;
+    m_btCursorRot = rAttachPoint.rotation;
+  }
+  override public void LateUpdateTool()
+  {
     // When the pointer manager is processing our line, don't stomp its position.
     if (!PointerManager.m_Instance.IsMainPointerProcessingLine()) {
       PositionPointer();
@@ -95,14 +120,47 @@ public class FreePaintTool : BaseTool {
     }
   }
 
-  void PositionPointer() {
+  void ApplyBimanualTape(ref Vector3 pos, ref Quaternion rot)
+  {
+      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+
+      Transform lAttachPoint = InputManager.m_Instance.GetWandControllerAttachPoint();
+      Vector3 lPos = lAttachPoint.position;
+      Quaternion lrot = lAttachPoint.rotation * sm_OrientationAdjust;
+
+      Vector3 deltaPos = lPos - m_btCursorPos;
+      Vector3 deltaBTCursor = pos - m_btCursorPos;
+
+
+      Vector3 m_btCursorGoalDelta = Vector3.Project(deltaBTCursor, deltaPos.normalized);
+
+      if (Vector3.Dot(m_btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
+      {
+          m_btCursorGoalDelta = Vector3.Lerp(Vector3.zero, m_btCursorGoalDelta, Mathf.Lerp(Time.deltaTime * brushTriggerRatio, 1, Mathf.Pow(brushTriggerRatio, 5)));
+
+        if (m_btCursorGoalDelta.magnitude < deltaPos.magnitude)
+          m_btCursorPos = m_btCursorPos + m_btCursorGoalDelta;
+        else
+          m_btCursorPos = lPos;
+      }
+
+      pos = m_btCursorPos;
+
+    }
+
+    void PositionPointer() {
     // Angle the pointer according to the user-defined pointer angle.
     Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
     Vector3 pos = rAttachPoint.position;
     Quaternion rot = rAttachPoint.rotation * sm_OrientationAdjust;
 
-    // Modify pointer position and rotation with stencils.
-    WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);
+      if (m_BimanualTape)
+        ApplyBimanualTape(ref pos, ref rot);
+      else
+      {
+        // Modify pointer position and rotation with stencils.
+        WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);
+      }
 
     PointerManager.m_Instance.SetPointerTransform(InputManager.ControllerName.Brush, pos, rot);
   }
