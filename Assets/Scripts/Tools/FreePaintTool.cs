@@ -318,22 +318,31 @@ public class FreePaintTool : BaseTool {
       Vector3 deltaBTCursor = pos - m_btCursorPos;
 
 
-      Vector3 m_btCursorGoalDelta = Vector3.Project(deltaBTCursor, deltaPos.normalized);
+      Vector3 btCursorGoalDelta = Vector3.Project(deltaBTCursor, deltaPos.normalized);
 
-      if (Vector3.Dot(m_btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
+
+      if (Vector3.Dot(btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
       {
-        m_btIntersectGoal = m_btCursorPos + m_btCursorGoalDelta;
+        m_btIntersectGoal = m_btCursorPos + btCursorGoalDelta;
 
-          m_btCursorGoalDelta = Vector3.Lerp(Vector3.zero, m_btCursorGoalDelta, Mathf.Lerp(Time.deltaTime * brushTriggerRatio, 1, Mathf.Pow(brushTriggerRatio, 5)));
+        float lerpRate = Mathf.Lerp(Time.deltaTime * brushTriggerRatio, 1, Mathf.Pow(brushTriggerRatio, 5));
 
-        if (m_btCursorGoalDelta.magnitude < deltaPos.magnitude)
-          m_btCursorPos = m_btCursorPos + m_btCursorGoalDelta;
+        btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, lerpRate);
+
+        if (btCursorGoalDelta.magnitude < deltaPos.magnitude)
+        {
+          m_btCursorPos = m_btCursorPos + btCursorGoalDelta;
+
+          Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
+          Quaternion btCursorRotGoal = Quaternion.LookRotation(deltaPos.normalized, (rAttachPoint.position - m_btIntersectGoal).normalized);
+          m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, lerpRate);
+        }
         else
           m_btCursorPos = lPos;
       }
 
       pos = m_btCursorPos;
-
+      rot = m_btCursorRot;
     }
 
     void PositionPointer() {
