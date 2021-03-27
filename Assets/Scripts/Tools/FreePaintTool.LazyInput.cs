@@ -6,6 +6,7 @@ namespace TiltBrush
   public partial class FreePaintTool
   {
     private bool m_lazyInput;
+    private float m_lazyInputRate;
 
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot)
     {
@@ -13,6 +14,7 @@ namespace TiltBrush
       {
         m_btCursorPos = pos;
         m_btCursorRot = rot;
+        m_lazyInputRate = 0;
 
         return;
       }
@@ -20,15 +22,18 @@ namespace TiltBrush
       Vector3 deltaPos = pos - m_btCursorPos;
 
       float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
-      float lerpRate = Mathf.Lerp(Time.deltaTime * brushTriggerRatio * 0.25f, 1, Mathf.Pow(brushTriggerRatio, 5));
+      float lerpRateGoal = Time.deltaTime * Mathf.Lerp(0.1f, 5, Mathf.Pow(brushTriggerRatio, 5));
 
-      Vector3 deltaBTCursor = Vector3.Lerp(Vector3.zero, deltaPos, lerpRate);
+      // add laziness to the rate at which laziness changes!
+      m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+      m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+      Vector3 deltaBTCursor = Vector3.Lerp(Vector3.zero, deltaPos, m_lazyInputRate);
 
       if (deltaBTCursor.magnitude > 0)
       {
         m_btCursorPos = m_btCursorPos + deltaBTCursor;
 
-        m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, lerpRate);
+        m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, m_lazyInputRate);
       }
 
       pos = m_btCursorPos;
