@@ -2485,7 +2485,9 @@ public class SketchControlsScript : MonoBehaviour {
         && !m_SketchSurfacePanel.ActiveTool.InputBlocked()
         && (m_GrabWidgetState == GrabWidgetState.None)
         && !m_GrabBrush.grabbingWorld
-        && !m_PinCushion.IsShowing();
+        && !m_PinCushion.IsShowing()
+        && !PointerManager.MainPointerIsPainting()
+        ;      
 
     bool bGazeDeactivationOverrideWithInput = false;
     List<PanelManager.PanelData> aAllPanels = m_PanelManager.GetAllPanels();
