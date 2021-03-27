@@ -146,8 +146,7 @@ namespace TiltBrush
         ApplyBimanualTape(ref pos, ref rot);
       else
       {
-        if (m_lazyInput)
-				  ApplyLazyInput(ref pos, ref rot);
+			  ApplyLazyInput(ref pos, ref rot);
 
         // Modify pointer position and rotation with stencils.
         WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);

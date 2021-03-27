@@ -140,6 +140,7 @@ namespace TiltBrush
       m_BimanualGuideIntersectRenderer.enabled = true;
       m_BimanualGuideIntersectOutlineRenderer.enabled = true;
       m_BimanualGuideIntersectVisible = true;
+      m_lazyInputRate = 0;
     }
     private void EndBimanualIntersect()
     {
@@ -206,14 +207,15 @@ namespace TiltBrush
 
       Vector3 btCursorGoalDelta = Vector3.Project(deltaBTCursor, deltaPos.normalized);
 
+      float lerpRateGoal = brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.1f, 5, Mathf.Pow(brushTriggerRatio, 5));
+      m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+      m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
 
       if (Vector3.Dot(btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
       {
         m_btIntersectGoal = m_btCursorPos + btCursorGoalDelta;
 
-        float lerpRate = Mathf.Lerp(Time.deltaTime * brushTriggerRatio, 1, Mathf.Pow(brushTriggerRatio, 5));
-
-        btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, lerpRate);
+        btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, m_lazyInputRate);
 
         if (btCursorGoalDelta.magnitude < deltaPos.magnitude)
         {
@@ -224,7 +226,7 @@ namespace TiltBrush
           if (intersectDelta.magnitude > GetSize())
           {            
             Quaternion btCursorRotGoal = Quaternion.LookRotation(intersectDelta.normalized, deltaPos.normalized) * sm_OrientationAdjust;
-            m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, lerpRate);
+            m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, m_lazyInputRate);
           }
         }
         else
