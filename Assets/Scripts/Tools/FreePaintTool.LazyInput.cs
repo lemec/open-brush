@@ -9,6 +9,16 @@ namespace TiltBrush
     private bool m_showLazyInputVisuals;
     private float m_lazyInputRate;
 
+    void UpdateLazyInputRate()
+    {
+      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+      float lerpRateGoal = brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.2f, 5, Mathf.Pow(brushTriggerRatio, 5));
+
+      // add laziness to the rate at which laziness changes!
+      m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+      m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+    }
+
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot)
     {
       if (!m_PaintingActive || !m_lazyInput)
@@ -23,12 +33,8 @@ namespace TiltBrush
 
       Vector3 deltaPos = pos - m_btCursorPos;
 
-      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
-      float lerpRateGoal = brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.1f, 5, Mathf.Pow(brushTriggerRatio, 5));
+      UpdateLazyInputRate();
 
-      // add laziness to the rate at which laziness changes!
-      m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
-      m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
       Vector3 deltaBTCursor = Vector3.Lerp(Vector3.zero, deltaPos, m_lazyInputRate);
 
       if (deltaBTCursor.magnitude > 0)

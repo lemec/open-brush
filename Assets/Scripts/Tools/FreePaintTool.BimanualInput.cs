@@ -195,7 +195,6 @@ namespace TiltBrush
 
     void ApplyBimanualTape(ref Vector3 pos, ref Quaternion rot)
     {
-      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
 
       Transform lAttachPoint = InputManager.m_Instance.GetWandControllerAttachPoint();
       Vector3 lPos = lAttachPoint.position;
@@ -207,9 +206,7 @@ namespace TiltBrush
 
       Vector3 btCursorGoalDelta = Vector3.Project(deltaBTCursor, deltaPos.normalized);
 
-      float lerpRateGoal = brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.1f, 5, Mathf.Pow(brushTriggerRatio, 5));
-      m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
-      m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
+      UpdateLazyInputRate();
 
       if (Vector3.Dot(btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
       {
