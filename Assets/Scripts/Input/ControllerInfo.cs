@@ -174,8 +174,9 @@ public abstract class ControllerInfo {
   /// Returns true if the current command *just* became active (rising-edge trigger).
   public bool GetCommandDown(SketchCommands rCommand) {
     switch (rCommand) {
+    case SketchCommands.AltActivate:
     case SketchCommands.Activate:
-      return IsTriggerDown();
+          return IsTriggerDown();
     case SketchCommands.RewindTimeline:
       return GetVrInputDown(VrInput.Button06 /*quad_down*/);
     case SketchCommands.AdvanceTimeline:

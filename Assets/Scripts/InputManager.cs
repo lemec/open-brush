@@ -686,7 +686,7 @@ public class InputManager : MonoBehaviour {
     case SketchCommands.SwapControls:
       return HasSwapGestureCompleted();
     case SketchCommands.AltActivate:
-      return GetMouseButtonDown(1);
+      return GetMouseButtonDown(1) || Wand.GetCommandDown(rCommand);
     }
 
     return false;
