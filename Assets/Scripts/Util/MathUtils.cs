@@ -227,19 +227,12 @@ static public class MathUtils {
           ConstrainRotationDelta(gripR0.rotation, gripR1.rotation, vLR0),
           0.5f);
       Quaternion qDelta = qSwing0To1 * qTwistAbout0;
-        // Constrain the rotation if requested.
-        if (rotationAxisConstraint != default(Vector3))
-          qDelta = ConstrainRotationDelta(Quaternion.identity, qDelta, rotationAxisConstraint);
-        else
-        {
-          float angle;
+      // Constrain the rotation if requested.
+      if (rotationAxisConstraint != default(Vector3)) {
+        qDelta = ConstrainRotationDelta(Quaternion.identity, qDelta, rotationAxisConstraint);
+      }
 
-          qDelta.ToAngleAxis(out angle, out rotationAxisConstraint);
-
-          qDelta = ConstrainRotationDelta(Quaternion.identity, qDelta, rotationAxisConstraint);
-        }
-
-        xfDelta23 = TrTransform
+      xfDelta23 = TrTransform
           .TRS(Vector3.zero, qDelta, deltaScale)
           .TransformBy(TrTransform.T(vInvariant1));
     }
