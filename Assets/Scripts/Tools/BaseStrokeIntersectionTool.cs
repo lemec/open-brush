@@ -84,7 +84,18 @@ public class BaseStrokeIntersectionTool : BaseTool {
     ClearGpuFutureLists();
   }
 
-  virtual protected void SnapIntersectionObjectToController() { }
+    public virtual bool altSelect
+    {
+      get
+      {
+        return InputManager.m_Instance.GetCommand(InputManager.SketchCommands.AltActivate);
+      }
+    }
+
+
+    public Batch m_BatchFilter;
+
+    virtual protected void SnapIntersectionObjectToController() { }
 
   /// Easier interface than overriding HandleIntersectionWith*
   virtual protected void HandleIntersection(Stroke stroke) { }

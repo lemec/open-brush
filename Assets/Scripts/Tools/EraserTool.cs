@@ -33,6 +33,7 @@ public class EraserTool : StrokeModificationTool {
 
   override protected void UpdateAudioVisuals() {
     bool bToolHot = IsHot;
+
     if (bToolHot != m_ToolWasHot) {
       m_ToolTransform.GetComponent<Renderer>().material =
           bToolHot ? m_ToolHotMaterial : m_ToolColdMaterial;
@@ -45,8 +46,9 @@ public class EraserTool : StrokeModificationTool {
     } else {
       m_SpinSpeed = Mathf.Max(m_SpinSpeed - m_SpinSpeedDecay * Time.deltaTime, 0.0f);
       m_SpinSpeedVel = 0.0f;
-    }
-    m_SpinAmount += m_SpinSpeed * Time.deltaTime;
+        m_BatchFilter = null;
+      }
+      m_SpinAmount += m_SpinSpeed * Time.deltaTime;
   }
 
   override protected void SnapIntersectionObjectToController() {
@@ -80,7 +82,21 @@ public class EraserTool : StrokeModificationTool {
           rGroup.m_ParentBatch.ParentPool.Name, Time.frameCount);
       return false;
     }
-    SketchMemoryScript.m_Instance.MemorizeDeleteSelection(rGroup.m_Stroke);
+
+      if (altSelect)
+      {
+        if (m_BatchFilter == null && rGroup.m_ParentBatch != null)
+          m_BatchFilter = rGroup.m_ParentBatch;
+
+        if (!ReferenceEquals(m_BatchFilter, rGroup.m_ParentBatch))
+          return true;
+      }
+      else
+        m_BatchFilter = null;
+
+
+
+      SketchMemoryScript.m_Instance.MemorizeDeleteSelection(rGroup.m_Stroke);
     PlayModifyStrokeSound();
     return true;
   }
