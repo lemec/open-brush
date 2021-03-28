@@ -32,6 +32,10 @@ namespace TiltBrush
     private Quaternion m_btCursorRot;
 
     Vector3 m_btIntersectGoal;
+    public bool m_brushTrigger { get; private set; }
+    public bool m_wandTrigger { get; private set; }
+    public float m_brushTriggerRatio { get; private set; }
+    public float m_wandTriggerRatio { get; private set; }
 
     private void InitBimanualTape()
     {
@@ -55,13 +59,15 @@ namespace TiltBrush
       m_BimanualTape = true;
       Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
 
-      m_btCursorPos = rAttachPoint.position;
+      m_btIntersectGoal = m_btCursorPos = rAttachPoint.position;			
       m_btCursorRot = rAttachPoint.rotation * sm_OrientationAdjust;
 
       m_BimanualGuideLineRenderer.material.SetFloat("_Intensity", m_BimanualGuideHintIntensity);
       m_BimanualGuideIntensity = m_BimanualGuideHintIntensity;
       m_BimanualGuideLineRenderer.enabled = true;
       m_BimanualGuideLineOutlineRenderer.enabled = true;
+
+      SketchControlsScript.m_Instance.RequestPanelsVisibility(false);
     }
 
     private void EndBimanualTape()
@@ -75,6 +81,8 @@ namespace TiltBrush
 
       if (m_BimanualGuideIntersectVisible)
         EndBimanualIntersect();
+
+      SketchControlsScript.m_Instance.RequestPanelsVisibility(true);
     }
 
     void UpdateBimanualGuideLineT()
@@ -90,13 +98,6 @@ namespace TiltBrush
 
     private void UpdateBimanualGuideVisuals()
     {
-      if (!m_PaintingActive)
-      {
-        Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
-        m_btCursorPos = brushAttachTransform.position;
-        m_btCursorRot = brushAttachTransform.rotation * sm_OrientationAdjust;
-      }
-
       Transform wandAttachTransform = InputManager.m_Instance.GetWandControllerAttachPoint();
 
       Vector3 brush_pos = m_btCursorPos;
@@ -212,22 +213,25 @@ namespace TiltBrush
       {
         m_btIntersectGoal = m_btCursorPos + btCursorGoalDelta;
 
-        btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, m_lazyInputRate);
-
-        if (btCursorGoalDelta.magnitude < deltaPos.magnitude)
+        if (m_brushTrigger)
         {
-          m_btCursorPos = m_btCursorPos + btCursorGoalDelta;
+          btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, m_lazyInputRate);
 
-          Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
-          Vector3 intersectDelta = m_btIntersectGoal - rAttachPoint.position;
-          if (intersectDelta.magnitude > GetSize())
-          {            
-            Quaternion btCursorRotGoal = Quaternion.LookRotation(intersectDelta.normalized, deltaPos.normalized) * sm_OrientationAdjust;
-            m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, m_lazyInputRate);
+          if (btCursorGoalDelta.magnitude < deltaPos.magnitude)
+          {
+            m_btCursorPos = m_btCursorPos + btCursorGoalDelta;
+
+            Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
+            Vector3 intersectDelta = m_btIntersectGoal - rAttachPoint.position;
+            if (intersectDelta.magnitude > GetSize())
+            {            
+              Quaternion btCursorRotGoal = Quaternion.LookRotation(intersectDelta.normalized, deltaPos.normalized) * sm_OrientationAdjust;
+              m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, m_lazyInputRate);
+            }
           }
+          else
+            m_btCursorPos = lPos;
         }
-        else
-          m_btCursorPos = lPos;
       }
 
       pos = m_btCursorPos;

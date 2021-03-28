@@ -48,7 +48,6 @@ namespace TiltBrush
         PointerManager.m_Instance.EnableLine(false);
         WidgetManager.m_Instance.ResetActiveStencil();
       }
-      m_lazyInput = false;
       m_PaintingActive = false;
     }
 
@@ -62,9 +61,11 @@ namespace TiltBrush
     {
       // Don't call base.UpdateTool() because we have a different 'stop eating input' check
       // for FreePaintTool.
-      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+      m_brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+      m_wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
+      m_brushTrigger = m_brushTriggerRatio > 0;
 
-      if (m_EatInput && brushTriggerRatio <= 0.0f)
+      if (m_EatInput && m_brushTriggerRatio <= 0.0f)
         m_EatInput = false;
 
       if (m_ExitOnAbortCommand && InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.Abort))
@@ -72,31 +73,28 @@ namespace TiltBrush
 
       PositionPointer();
 
-      float wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
-
-      if (!m_BimanualTape && !m_PaintingActive && wandTriggerRatio > 0)
+      if (!m_BimanualTape && !m_PaintingActive && m_wandTriggerRatio > 0)
         BeginBimanualTape();
 
-      m_PaintingActive = !m_EatInput && !m_ToolHidden && (brushTriggerRatio > 0 || (m_PaintingActive && m_BimanualTape && wandTriggerRatio > 0));
+      m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
 
       if (m_BimanualTape)
       {
-        if (wandTriggerRatio <= 0 && !m_PaintingActive)
+        if (m_wandTriggerRatio <= 0 && !m_brushTrigger)
           EndBimanualTape();
         else
         {
           UpdateBimanualGuideLineT();
           UpdateBimanualGuideVisuals();
 
-          if (m_PaintingActive)
-            UpdateBimanualIntersectVisuals();
+          UpdateBimanualIntersectVisuals();
         }
       }
       else if (InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Undo))
         m_lazyInput = !m_lazyInput;
 
       PointerManager.m_Instance.EnableLine(m_PaintingActive);
-      PointerManager.m_Instance.PointerPressure = InputManager.Brush.GetTriggerRatio();
+      PointerManager.m_Instance.PointerPressure = m_brushTriggerRatio;
 
     }
 

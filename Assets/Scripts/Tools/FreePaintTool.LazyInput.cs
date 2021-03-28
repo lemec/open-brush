@@ -11,8 +11,13 @@ namespace TiltBrush
 
     void UpdateLazyInputRate()
     {
-      float brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
-      float lerpRateGoal = brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.2f, 5, Mathf.Pow(brushTriggerRatio, 5));
+      if (!m_lazyInput)
+      {
+        m_lazyInputRate = 1;
+        return;
+      }
+
+      float lerpRateGoal = m_brushTriggerRatio * Time.deltaTime * Mathf.Lerp(0.2f, 5, Mathf.Pow(m_brushTriggerRatio, 5));
 
       // add laziness to the rate at which laziness changes!
       m_lazyInputRate = Mathf.Lerp(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
