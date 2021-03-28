@@ -2417,6 +2417,22 @@ namespace TiltBrush
       }
     }
 
+    bool CheckToggleTiltProtection()
+    {
+      if (
+        !InGrabCanvasMode && 
+        InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.AltActivate)
+      )
+      {
+        App.Scene.disableTiltProtection = !App.Scene.disableTiltProtection;
+
+        return !App.Scene.disableTiltProtection;
+      }
+
+      return false;
+
+    }
+
     void UpdateGrab_World()
     {
       bool bAllowWorldTransform = m_SketchSurfacePanel.ActiveTool.AllowWorldTransformation() &&
@@ -2469,6 +2485,7 @@ namespace TiltBrush
       {
         if (nGrabs == 2)
         {
+
           // Two-handed world movement.
           m_WorldBeingGrabbed = true;
           TrTransform grabXfWand = TrTransform.FromTransform(
@@ -2512,6 +2529,8 @@ namespace TiltBrush
             }
             else
             {
+              bool fixOffset = CheckToggleTiltProtection();
+
               xfNew = MathUtils.TwoPointObjectTransformation(
                   m_GrabBrush.grabTransform, m_GrabWand.grabTransform,
                   grabXfBrush, grabXfWand,
@@ -2528,9 +2547,21 @@ namespace TiltBrush
                   AudioManager.m_Instance.m_WorldGrabLoopAttenuation, 0f,
                   AudioManager.m_Instance.m_WorldGrabLoopMaxVolume));
 
-              bool altModeDown = InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.AltActivate);
-              if (altModeDown)
-                App.Scene.disableTiltProtection = !App.Scene.disableTiltProtection;
+              if (fixOffset)
+              {
+                Vector3 midPoint = Vector3.Lerp(grabXfBrush.translation, grabXfWand.translation, 0.5f);
+
+                Vector3 localMidPointOldXF = xfOld.inverse * midPoint;
+
+                // assign this to force the axial protection
+                GrabbedPose = xfNew;
+                xfNew = GrabbedPose;
+
+                Vector3 midPointXFNew = xfNew * localMidPointOldXF;
+
+								TrTransform xfDelta1 = TrTransform.T(midPoint - midPointXFNew);
+                xfNew = xfDelta1 * xfNew;
+              }
             }
             GrabbedPose = xfNew;
 
