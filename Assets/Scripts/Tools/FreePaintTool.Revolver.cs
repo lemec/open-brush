@@ -41,9 +41,17 @@ namespace TiltBrush {
 
       Quaternion radialLookRot = Quaternion.LookRotation(radialDelta.normalized, guideDelta);
 
+      m_RevolverAngle = m_RevolverAngle + m_RevolverVelocity * 720 * Time.deltaTime;
+
       if (m_brushTrigger) {
-        m_RevolverVelocity = Mathf.Clamp(m_RevolverVelocity + -InputManager.m_Instance.GetBrushScrollAmount() * Time.deltaTime * 120, -360, 360); // 10 revolutions/sec
-        m_RevolverAngle = m_RevolverAngle + m_RevolverVelocity * Time.deltaTime / Mathf.Max(0.25f, Mathf.Abs(m_RevolverRadius));
+				if (InputManager.m_Instance.IsBrushScrollActive()) {
+
+          float turnRate = InputManager.m_Instance.GetBrushScrollAmount();
+          // apply a cubic exponential speed curve to make joystick handling easier
+          turnRate = Mathf.Sign(turnRate) * Mathf.Pow(Mathf.Abs(turnRate), 3);
+
+          m_RevolverVelocity = Mathf.MoveTowards(m_RevolverVelocity, -turnRate, Time.deltaTime * (turnRate == 0 ? 0.15f : 0.333f));
+        }
       }
       else {
         Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
@@ -52,7 +60,8 @@ namespace TiltBrush {
 
         m_RevolverBrushRotationOffset = radialLookRot.TrueInverse() * RevolverBrushRotation;
 
-        m_RevolverAngle = 0;
+        if (m_RevolverVelocity == 0)
+          m_RevolverAngle = 0;
       }
 
 
