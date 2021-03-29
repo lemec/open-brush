@@ -84,8 +84,8 @@ public class BaseStrokeIntersectionTool : BaseTool {
     ClearGpuFutureLists();
   }
 
-    public virtual bool altSelect
-    {
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    public virtual bool altSelect {
       get
       {
         return InputManager.m_Instance.GetCommand(InputManager.SketchCommands.AltActivate);
@@ -94,6 +94,7 @@ public class BaseStrokeIntersectionTool : BaseTool {
 
 
     public Batch m_BatchFilter;
+#endif
 
     virtual protected void SnapIntersectionObjectToController() { }
 
