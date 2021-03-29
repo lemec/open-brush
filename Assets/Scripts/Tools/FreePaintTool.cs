@@ -14,8 +14,7 @@
 
 using UnityEngine;
 
-namespace TiltBrush
-{
+namespace TiltBrush {
 
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
   public partial class FreePaintTool : BaseTool
@@ -32,42 +31,35 @@ namespace TiltBrush
     private bool m_PaintingActive;
 
 
-    override public void Init()
-    {
+    override public void Init() {
       base.Init();
       m_PaintingActive = false;
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
+      if (Config.IsExperimental) {
         InitBimanualTape();
       }
 #endif
     }
 
-    public override bool ShouldShowPointer()
-    {
+    public override bool ShouldShowPointer() {
       return !PanelManager.m_Instance.IntroSketchbookMode;
     }
 
-    override public void EnableTool(bool bEnable)
-    {
+    override public void EnableTool(bool bEnable) {
       base.EnableTool(bEnable);
-      if (!bEnable)
-      {
+      if (!bEnable) {
         PointerManager.m_Instance.EnableLine(false);
         WidgetManager.m_Instance.ResetActiveStencil();
       }
       m_PaintingActive = false;
     }
 
-    override public bool ShouldShowTouch()
-    {
+    override public bool ShouldShowTouch() {
       return false;
     }
 
     static Quaternion sm_OrientationAdjust = Quaternion.Euler(new Vector3(0, 180, 0));
-    override public void UpdateTool()
-    {
+    override public void UpdateTool() {
       // Don't call base.UpdateTool() because we have a different 'stop eating input' check
       // for FreePaintTool.
       m_wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
@@ -90,20 +82,17 @@ namespace TiltBrush
       PositionPointer();
 
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
+      if (Config.IsExperimental) {
 
         if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger)
           BeginBimanualTape();
 
         m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
 
-        if (m_BimanualTape)
-        {
+        if (m_BimanualTape) {
           if (!m_wandTrigger && !m_brushTrigger)
             EndBimanualTape();
-          else
-          {
+          else {
             UpdateBimanualGuideLineT();
             UpdateBimanualGuideVisuals();
 
@@ -128,42 +117,33 @@ namespace TiltBrush
     }
 
 
-    override public void LateUpdateTool()
-    {
+    override public void LateUpdateTool() {
       // When the pointer manager is processing our line, don't stomp its position.
-      if (!PointerManager.m_Instance.IsMainPointerProcessingLine())
-      {
+      if (!PointerManager.m_Instance.IsMainPointerProcessingLine()) {
         PositionPointer();
       }
     }
 
-    override public void AssignControllerMaterials(InputManager.ControllerName controller)
-    {
-      if (controller == InputManager.ControllerName.Brush)
-      {
-        if (App.Instance.IsInStateThatAllowsPainting())
-        {
-          if (m_PaintingActive)
-          {
+    override public void AssignControllerMaterials(InputManager.ControllerName controller) {
+      if (controller == InputManager.ControllerName.Brush) {
+        if (App.Instance.IsInStateThatAllowsPainting()) {
+          if (m_PaintingActive) {
             // TODO: Make snap work with non-line shapes.
             if (PointerManager.m_Instance.StraightEdgeModeEnabled &&
-                PointerManager.m_Instance.StraightEdgeGuideIsLine)
-            {
+                PointerManager.m_Instance.StraightEdgeGuideIsLine) {
               InputManager.Brush.Geometry.TogglePadSnapHint(
                   PointerManager.m_Instance.StraightEdgeGuide.SnapEnabled,
                   enabled: true);
             }
           }
-          else
-          {
+          else {
             InputManager.Brush.Geometry.ShowBrushSizer();
           }
         }
       }
     }
 
-    void PositionPointer()
-    {
+    void PositionPointer() {
       // Angle the pointer according to the user-defined pointer angle.
       Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
       Vector3 pos = rAttachPoint.position;
@@ -173,15 +153,12 @@ namespace TiltBrush
       WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);
 
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
-        if (m_BimanualTape)
-        {
+      if (Config.IsExperimental) {
+        if (m_BimanualTape) {
           ApplyBimanualTape(ref pos, ref rot);
           ApplyRevolver(ref pos, ref rot);
         }
-        else
-        {
+        else {
           ApplyLazyInput(ref pos, ref rot);
         }
       }
@@ -190,8 +167,7 @@ namespace TiltBrush
       PointerManager.m_Instance.SetPointerTransform(InputManager.ControllerName.Brush, pos, rot);
     }
 
-    override public void UpdateSize(float fAdjustAmount)
-    {
+    override public void UpdateSize(float fAdjustAmount) {
       float fPrevRatio = GetSize01();
       PointerManager.m_Instance.AdjustAllPointersBrushSize01(m_AdjustSizeScalar * fAdjustAmount);
       PointerManager.m_Instance.MarkAllBrushSizeUsed();
@@ -200,28 +176,23 @@ namespace TiltBrush
       float fHalfInterval = m_HapticInterval * 0.5f;
       int iPrevInterval = (int)((fPrevRatio + fHalfInterval) / m_HapticInterval);
       int iCurrentInterval = (int)((fCurrentRatio + fHalfInterval) / m_HapticInterval);
-      if (!App.VrSdk.AnalogIsStick(InputManager.ControllerName.Brush))
-      {
-        if (iCurrentInterval > iPrevInterval)
-        {
+      if (!App.VrSdk.AnalogIsStick(InputManager.ControllerName.Brush)) {
+        if (iCurrentInterval > iPrevInterval) {
           InputManager.m_Instance.TriggerHaptics(
               InputManager.ControllerName.Brush, m_HapticSizeUp);
         }
-        else if (iCurrentInterval < iPrevInterval)
-        {
+        else if (iCurrentInterval < iPrevInterval) {
           InputManager.m_Instance.TriggerHaptics(
               InputManager.ControllerName.Brush, m_HapticSizeDown);
         }
       }
     }
 
-    override public float GetSize01()
-    {
+    override public float GetSize01() {
       return PointerManager.m_Instance.GetPointerBrushSize01(InputManager.ControllerName.Brush);
     }
 
-    override public bool CanAdjustSize()
-    {
+    override public bool CanAdjustSize() {
       return App.Instance.IsInStateThatAllowsPainting();
     }
   }

@@ -2,19 +2,15 @@
 
 using UnityEngine;
 
-namespace TiltBrush
-{
+namespace TiltBrush {
 
-  public partial class FreePaintTool
-  {
+  public partial class FreePaintTool {
     private bool m_lazyInput;
     private bool m_showLazyInputVisuals;
     private float m_lazyInputRate;
 
-    void UpdateLazyInputRate()
-    {
-      if (!m_lazyInput)
-      {
+    void UpdateLazyInputRate() {
+      if (!m_lazyInput) {
         m_lazyInputRate = 1;
         return;
       }
@@ -26,10 +22,8 @@ namespace TiltBrush
       m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
     }
 
-    void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot)
-    {
-      if (!m_PaintingActive || !m_lazyInput)
-      {
+    void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot) {
+      if (!m_PaintingActive || !m_lazyInput) {
         m_btCursorPos = pos;
         m_btCursorRot = rot;
         m_lazyInputRate = 0;
@@ -44,8 +38,7 @@ namespace TiltBrush
 
       Vector3 deltaBTCursor = Vector3.Lerp(Vector3.zero, deltaPos, m_lazyInputRate);
 
-      if (deltaBTCursor.magnitude > 0)
-      {
+      if (deltaBTCursor.magnitude > 0) {
         m_btCursorPos = m_btCursorPos + deltaBTCursor;
 
         m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, m_lazyInputRate);
@@ -57,8 +50,7 @@ namespace TiltBrush
       UpdateLazyInputVisuals();
     }
 
-    private void UpdateLazyInputVisuals()
-    {
+    private void UpdateLazyInputVisuals() {
       BeginLazyInputVisuals();
 
       Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
@@ -69,8 +61,7 @@ namespace TiltBrush
       cursorPos = Vector3.Lerp(brushPos, cursorPos, m_BimanualGuideLineT);
 
       float line_length = (cursorPos - brushPos).magnitude;
-      if (line_length > 0.0f)
-      {
+      if (line_length > 0.0f) {
         Vector3 brush_to_wand = (cursorPos - brushPos).normalized;
         Vector3 centerpoint = cursorPos - (cursorPos - brushPos) / 2.0f;
         transform.position = centerpoint;
@@ -86,8 +77,7 @@ namespace TiltBrush
         temp.z += m_BimanualGuideLineOutlineWidth;
         m_BimanualGuideLineOutline.localScale = temp;
       }
-      else
-      {
+      else {
         // Short term disable of line
         m_BimanualGuideLine.localScale = Vector3.zero;
         m_BimanualGuideLineOutline.localScale = Vector3.zero;
@@ -97,8 +87,7 @@ namespace TiltBrush
           SketchControlsScript.m_Instance.m_GrabHighlightActiveColor);
     }
 
-    private void BeginLazyInputVisuals()
-    {
+    private void BeginLazyInputVisuals() {
       if (m_showLazyInputVisuals)
         return;
 
@@ -111,8 +100,7 @@ namespace TiltBrush
       m_BimanualGuideLineOutlineRenderer.enabled = true;
     }
 
-    private void EndLazyInputVisuals()
-    {
+    private void EndLazyInputVisuals() {
       if (!m_showLazyInputVisuals)
         return;
 

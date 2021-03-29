@@ -1,18 +1,15 @@
 ﻿#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
 using UnityEngine;
 
-namespace TiltBrush
-{
-  public partial class FreePaintTool
-  {
+namespace TiltBrush {
+  public partial class FreePaintTool {
     private bool m_RevolverActive;
     private float m_RevolverRadius;
     private float m_RevolverAngle;
     private float m_RevolverVelocity;
     private Quaternion m_RevolverBrushRotationOffset;
 
-    private void BeginRevolver()
-    {
+    private void BeginRevolver() {
       if (m_RevolverActive)
         return;
 
@@ -23,15 +20,13 @@ namespace TiltBrush
       SetRevolverRadius(1);
     }
 
-    private void SetRevolverRadius(float lerpRate)
-    {
+    private void SetRevolverRadius(float lerpRate) {
       Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
       Vector3 brushDelta = m_btIntersectGoal - brushAttachTransform.position;
       m_RevolverRadius = Mathf.Lerp(m_RevolverRadius, brushDelta.magnitude, lerpRate);
     }
 
-    private void ApplyRevolver(ref Vector3 pos, ref Quaternion rot)
-    {
+    private void ApplyRevolver(ref Vector3 pos, ref Quaternion rot) {
       if (!m_RevolverActive)
         return;
 
@@ -46,13 +41,11 @@ namespace TiltBrush
 
       Quaternion radialLookRot = Quaternion.LookRotation(radialDelta.normalized, guideDelta);
 
-      if (m_brushTrigger)
-      {
+      if (m_brushTrigger) {
         m_RevolverVelocity = Mathf.Clamp(m_RevolverVelocity + -InputManager.m_Instance.GetBrushScrollAmount() * Time.deltaTime * 120, -360, 360); // 10 revolutions/sec
         m_RevolverAngle = m_RevolverAngle + m_RevolverVelocity * Time.deltaTime / Mathf.Max(0.25f, Mathf.Abs(m_RevolverRadius));
       }
-      else
-      {
+      else {
         Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
 
         Quaternion RevolverBrushRotation = brushAttachTransform.rotation * sm_OrientationAdjust;

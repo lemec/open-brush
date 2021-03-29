@@ -2,11 +2,9 @@
 
 using UnityEngine;
 
-namespace TiltBrush
-{
+namespace TiltBrush {
 
-  public partial class FreePaintTool
-  {
+  public partial class FreePaintTool {
     [SerializeField] private Transform m_BimanualGuideLine;
     [SerializeField] private Transform m_BimanualGuideLineOutline;
     private Renderer m_BimanualGuideLineRenderer;
@@ -44,8 +42,7 @@ namespace TiltBrush
     public float m_brushTriggerRatio { get; private set; }
     public float m_wandTriggerRatio { get; private set; }
 
-    private void InitBimanualTape()
-    {
+    private void InitBimanualTape() {
       m_BimanualTape = false;
 
       m_BimanualGuideLineRenderer = m_BimanualGuideLine.GetComponent<Renderer>();
@@ -61,14 +58,13 @@ namespace TiltBrush
       EndBimanualTape();
     }
 
-    private void BeginBimanualTape()
-    {
+    private void BeginBimanualTape() {
       m_BimanualTape = true;
       m_RevolverActive = false;
 
       Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
 
-      m_btIntersectGoal = m_btCursorPos = rAttachPoint.position;			
+      m_btIntersectGoal = m_btCursorPos = rAttachPoint.position;
       m_btCursorRot = rAttachPoint.rotation * sm_OrientationAdjust;
 
       m_BimanualGuideLineRenderer.material.SetFloat("_Intensity", m_BimanualGuideHintIntensity);
@@ -79,8 +75,7 @@ namespace TiltBrush
       SketchControlsScript.m_Instance.RequestPanelsVisibility(false);
     }
 
-    private void EndBimanualTape()
-    {
+    private void EndBimanualTape() {
       m_BimanualTape = false;
 
       m_BimanualGuideLineDrawInTime = 0.0f;
@@ -94,10 +89,8 @@ namespace TiltBrush
       SketchControlsScript.m_Instance.RequestPanelsVisibility(true);
     }
 
-    void UpdateBimanualGuideLineT()
-    {
-      if (m_BimanualGuideLineT < 1.0f)
-      {
+    void UpdateBimanualGuideLineT() {
+      if (m_BimanualGuideLineT < 1.0f) {
         m_BimanualGuideLineT = Mathf.SmoothStep(0.0f, 1.0f,
             Mathf.Clamp(m_BimanualGuideLineDrawInTime / m_BimanualGuideDrawInDuration, 0.0f, 1.0f));
         m_BimanualGuideLineDrawInTime += Time.deltaTime;
@@ -105,8 +98,7 @@ namespace TiltBrush
     }
 
 
-    private void UpdateBimanualGuideVisuals()
-    {
+    private void UpdateBimanualGuideVisuals() {
       Transform wandAttachTransform = InputManager.m_Instance.GetWandControllerAttachPoint();
 
       Vector3 brush_pos = m_btCursorPos;
@@ -115,8 +107,7 @@ namespace TiltBrush
       brush_pos = Vector3.Lerp(wand_pos, brush_pos, m_BimanualGuideLineT);
 
       float line_length = (brush_pos - wand_pos).magnitude;
-      if (line_length > 0.0f)
-      {
+      if (line_length > 0.0f) {
         Vector3 brush_to_wand = (brush_pos - wand_pos).normalized;
         Vector3 centerpoint = brush_pos - (brush_pos - wand_pos) / 2.0f;
         transform.position = centerpoint;
@@ -132,8 +123,7 @@ namespace TiltBrush
         temp.z += m_BimanualGuideLineOutlineWidth;
         m_BimanualGuideLineOutline.localScale = temp;
       }
-      else
-      {
+      else {
         // Short term disable of line
         m_BimanualGuideLine.localScale = Vector3.zero;
         m_BimanualGuideLineOutline.localScale = Vector3.zero;
@@ -144,23 +134,20 @@ namespace TiltBrush
     }
 
 
-    private void BeginBimanualIntersect()
-    {
+    private void BeginBimanualIntersect() {
       m_BimanualGuideIntersectRenderer.material.SetFloat("_Intensity", m_BimanualGuideHintIntensity);
       m_BimanualGuideIntersectRenderer.enabled = true;
       m_BimanualGuideIntersectOutlineRenderer.enabled = true;
       m_BimanualGuideIntersectVisible = true;
       m_lazyInputRate = 0;
     }
-    private void EndBimanualIntersect()
-    {
+    private void EndBimanualIntersect() {
       m_BimanualGuideIntersectRenderer.enabled = false;
       m_BimanualGuideIntersectOutlineRenderer.enabled = false;
       m_BimanualGuideIntersectVisible = false;
     }
 
-    private void UpdateBimanualIntersectVisuals()
-    {
+    private void UpdateBimanualIntersectVisuals() {
       if (!m_BimanualGuideIntersectVisible)
         BeginBimanualIntersect();
 
@@ -172,8 +159,7 @@ namespace TiltBrush
       brush_pos = Vector3.Lerp(intersect_pos, brush_pos, m_BimanualGuideLineT);
 
       float line_length = (brush_pos - intersect_pos).magnitude;
-      if (line_length > 0.0f)
-      {
+      if (line_length > 0.0f) {
         Vector3 brush_to_wand = (brush_pos - intersect_pos).normalized;
         Vector3 centerpoint = brush_pos - (brush_pos - intersect_pos) / 2.0f;
         transform.position = centerpoint;
@@ -189,8 +175,7 @@ namespace TiltBrush
         temp.z += m_BimanualGuideLineOutlineWidth;
         m_BimanualGuideIntersectOutline.localScale = temp;
       }
-      else
-      {
+      else {
         // Short term disable of line
         m_BimanualGuideIntersect.localScale = Vector3.zero;
         m_BimanualGuideIntersectOutline.localScale = Vector3.zero;
@@ -203,8 +188,7 @@ namespace TiltBrush
 
 
 
-    void ApplyBimanualTape(ref Vector3 pos, ref Quaternion rot)
-    {
+    void ApplyBimanualTape(ref Vector3 pos, ref Quaternion rot) {
 
       Transform lAttachPoint = InputManager.m_Instance.GetWandControllerAttachPoint();
       Vector3 lPos = lAttachPoint.position;
@@ -218,22 +202,18 @@ namespace TiltBrush
 
       UpdateLazyInputRate();
 
-      if (Vector3.Dot(btCursorGoalDelta.normalized, deltaPos.normalized) > 0)
-      {
+      if (Vector3.Dot(btCursorGoalDelta.normalized, deltaPos.normalized) > 0) {
         m_btIntersectGoal = m_btCursorPos + btCursorGoalDelta;
 
-        if (m_brushTrigger)
-        {
+        if (m_brushTrigger) {
           btCursorGoalDelta = Vector3.Lerp(Vector3.zero, btCursorGoalDelta, m_lazyInputRate);
 
-          if (btCursorGoalDelta.magnitude < deltaPos.magnitude)
-          {
+          if (btCursorGoalDelta.magnitude < deltaPos.magnitude) {
             m_btCursorPos = m_btCursorPos + btCursorGoalDelta;
 
             Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
             Vector3 intersectDelta = m_btIntersectGoal - rAttachPoint.position;
-            if (intersectDelta.magnitude > GetSize())
-            {            
+            if (intersectDelta.magnitude > GetSize()) {
               Quaternion btCursorRotGoal = Quaternion.LookRotation(intersectDelta.normalized, deltaPos.normalized) * sm_OrientationAdjust;
               m_btCursorRot = Quaternion.Slerp(m_btCursorRot, btCursorRotGoal, m_lazyInputRate);
             }

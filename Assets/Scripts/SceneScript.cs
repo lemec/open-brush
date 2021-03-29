@@ -16,14 +16,12 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace TiltBrush
-{
+namespace TiltBrush {
 
   // TODO: Allow light count to be reduced.  Having to deal with inactive
   // lights is a burden for the rest of the codebase, and can be error prone
   // (e.g. component enabled vs. game object active).
-  public class SceneScript : MonoBehaviour
-  {
+  public class SceneScript : MonoBehaviour {
     public delegate void PoseChangedEventHandler(
         TrTransform prev, TrTransform current);
     public delegate void ActiveCanvasChangedEventHandler(
@@ -63,14 +61,11 @@ namespace TiltBrush
     /// The global pose of this scene. All scene modifications must go through this.
     /// On assignment, range of local scale is limited (log10) to +/-4.
     /// Emits SceneScript.PoseChanged, CanvasScript.PoseChanged.
-    public TrTransform Pose
-    {
-      get
-      {
+    public TrTransform Pose {
+      get {
         return Coords.AsGlobal[transform];
       }
-      set
-      {
+      set {
         var prevScene = Coords.AsGlobal[transform];
 
         value = SketchControlsScript.MakeValidScenePose(value,
@@ -87,8 +82,7 @@ namespace TiltBrush
             bRestoreUp = !disableTiltProtection;
 #endif
 
-          if (bRestoreUp)
-          {
+          if (bRestoreUp) {
             var qRestoreUp = Quaternion.FromToRotation(
                 value.rotation * Vector3.up, Vector3.up);
             value = TrTransform.R(qRestoreUp) * value;
@@ -101,14 +95,11 @@ namespace TiltBrush
         // hasChanged is used in development builds to detect unsanctioned
         // changes to the transform. Set to false so we don't trip the detection!
         transform.hasChanged = false;
-        if (PoseChanged != null)
-        {
+        if (PoseChanged != null) {
           PoseChanged(prevScene, value);
         }
-        using (var canvases = AllCanvases.GetEnumerator())
-        {
-          while (canvases.MoveNext())
-          {
+        using (var canvases = AllCanvases.GetEnumerator()) {
+          while (canvases.MoveNext()) {
             canvases.Current.OnScenePoseChanged(prevScene, value);
           }
         }
@@ -116,22 +107,17 @@ namespace TiltBrush
     }
 
     /// Safe to use any time after initialization
-    public CanvasScript ActiveCanvas
-    {
-      get
-      {
+    public CanvasScript ActiveCanvas {
+      get {
         Debug.Assert(m_bInitialized);
         return m_ActiveCanvas;
       }
-      set
-      {
+      set {
         Debug.Assert(m_bInitialized);
-        if (value != m_ActiveCanvas)
-        {
+        if (value != m_ActiveCanvas) {
           var prev = m_ActiveCanvas;
           m_ActiveCanvas = value;
-          if (ActiveCanvasChanged != null)
-          {
+          if (ActiveCanvasChanged != null) {
             ActiveCanvasChanged(prev, m_ActiveCanvas);
             // This will be incredibly irritating, but until we have some other feedback...
             OutputWindowScript.m_Instance.CreateInfoCardAtController(
@@ -147,20 +133,15 @@ namespace TiltBrush
     public CanvasScript MainCanvas { get { return m_MainCanvas; } }
     public CanvasScript SelectionCanvas { get { return m_SelectionCanvas; } }
 
-    public IEnumerable<CanvasScript> AllCanvases
-    {
-      get
-      {
+    public IEnumerable<CanvasScript> AllCanvases {
+      get {
         yield return MainCanvas;
-        if (SelectionCanvas != null)
-        {
+        if (SelectionCanvas != null) {
           yield return SelectionCanvas;
         }
 
-        if (m_LayerCanvases != null)
-        {
-          for (int i = 0; i < m_LayerCanvases.Count; ++i)
-          {
+        if (m_LayerCanvases != null) {
+          for (int i = 0; i < m_LayerCanvases.Count; ++i) {
             yield return m_LayerCanvases[i];
           }
         }
@@ -168,28 +149,23 @@ namespace TiltBrush
     }
 
     // Init unless already initialized. Safe to call zero or multiple times.
-    public void Init()
-    {
-      if (m_bInitialized)
-      {
+    public void Init() {
+      if (m_bInitialized) {
         return;
       }
       m_bInitialized = true;
       m_LayerCanvases = new List<CanvasScript>();
       AsScene = new TransformExtensions.RelativeAccessor(transform);
       m_ActiveCanvas = m_MainCanvas;
-      foreach (var c in AllCanvases)
-      {
+      foreach (var c in AllCanvases) {
         c.Init();
       }
     }
 
-    void Awake()
-    {
+    void Awake() {
       Init();
       m_Lights = new Light[(int)LightMode.NumLights];
-      for (int i = 0; i < m_Lights.Length; ++i)
-      {
+      for (int i = 0; i < m_Lights.Length; ++i) {
         GameObject go = new GameObject(string.Format("SceneLight {0}", i));
         Transform t = go.transform;
         t.parent = App.Instance.m_EnvironmentTransform;
@@ -206,11 +182,9 @@ namespace TiltBrush
       m_Lights[(int)LightMode.NoShadow].renderMode = LightRenderMode.ForceVertex;
     }
 
-    public CanvasScript Test_AddLayer()
-    {
+    public CanvasScript Test_AddLayer() {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
+      if (Config.IsExperimental) {
         var go = new GameObject(string.Format("Layer {0}", m_LayerCanvases.Count));
         go.transform.parent = transform;
         Coords.AsLocal[go.transform] = TrTransform.identity;
@@ -224,21 +198,16 @@ namespace TiltBrush
       return null;
     }
 
-    public void Test_SquashCurrentLayer()
-    {
+    public void Test_SquashCurrentLayer() {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
+      if (Config.IsExperimental) {
         var layer = ActiveCanvas;
-        if (layer == m_MainCanvas)
-        {
+        if (layer == m_MainCanvas) {
           return;
         }
         // TODO: this should defer updates to the batches until the end
-        foreach (var stroke in SketchMemoryScript.AllStrokes())
-        {
-          if (stroke.Canvas == layer)
-          {
+        foreach (var stroke in SketchMemoryScript.AllStrokes()) {
+          if (stroke.Canvas == layer) {
             stroke.SetParentKeepWorldPosition(m_MainCanvas);
           }
         }
@@ -251,17 +220,14 @@ namespace TiltBrush
 #endif
     }
 
-    public void Test_CycleCanvas()
-    {
+    public void Test_CycleCanvas() {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
-      if (Config.IsExperimental)
-      {
+      if (Config.IsExperimental) {
         // Klunky! Find the next canvas in the list (assumes AllCanvases has deterministic order)
         // Skip over the selection canvas; it's internal.
         var all = AllCanvases.ToList();
         int next = (all.IndexOf(ActiveCanvas) + 1) % all.Count;
-        if (all[next] == m_SelectionCanvas)
-        {
+        if (all[next] == m_SelectionCanvas) {
           next = (next + 1) % all.Count;
         }
         ActiveCanvas = all[next];
@@ -269,13 +235,11 @@ namespace TiltBrush
 #endif
     }
 
-    public int GetNumLights()
-    {
+    public int GetNumLights() {
       return m_Lights.Length;
     }
 
-    public Light GetLight(int index)
-    {
+    public Light GetLight(int index) {
       return m_Lights[index];
     }
   }
