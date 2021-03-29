@@ -17,7 +17,11 @@ using UnityEngine;
 namespace TiltBrush
 {
 
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
   public partial class FreePaintTool : BaseTool
+#else
+  public class FreePaintTool : BaseTool
+#endif
   {
     [SerializeField] private float m_AdjustSizeScalar;
 
@@ -32,7 +36,12 @@ namespace TiltBrush
     {
       base.Init();
       m_PaintingActive = false;
-      InitBimanualTape();
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      if (Config.IsExperimental)
+      {
+        InitBimanualTape();
+      }
+#endif
     }
 
     public override bool ShouldShowPointer()
@@ -80,28 +89,38 @@ namespace TiltBrush
 
       PositionPointer();
 
-      if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger)
-        BeginBimanualTape();
-
-      m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
-
-      if (m_BimanualTape)
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      if (Config.IsExperimental)
       {
-        if (m_wandTriggerRatio <= 0 && !m_brushTrigger)
-          EndBimanualTape();
-        else
+
+        if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger)
+          BeginBimanualTape();
+
+        m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
+
+        if (m_BimanualTape)
         {
-          UpdateBimanualGuideLineT();
-          UpdateBimanualGuideVisuals();
+          if (!m_wandTrigger && !m_brushTrigger)
+            EndBimanualTape();
+          else
+          {
+            UpdateBimanualGuideLineT();
+            UpdateBimanualGuideVisuals();
 
-          UpdateBimanualIntersectVisuals();
+            UpdateBimanualIntersectVisuals();
 
-          if (m_brushUndoButtonDown)
-            BeginRevolver();
+            if (m_brushUndoButtonDown)
+              BeginRevolver();
+          }
         }
+        else if (m_brushUndoButtonDown)
+          m_lazyInput = !m_lazyInput;
       }
-      else if (m_brushUndoButtonDown)
-        m_lazyInput = !m_lazyInput;
+      else
+        m_PaintingActive = !m_EatInput && !m_ToolHidden && m_brushTrigger;
+#else
+        m_PaintingActive = !m_EatInput && !m_ToolHidden && m_brushTrigger;
+#endif
 
       PointerManager.m_Instance.EnableLine(m_PaintingActive);
       PointerManager.m_Instance.PointerPressure = m_brushTriggerRatio;
@@ -150,18 +169,23 @@ namespace TiltBrush
       Vector3 pos = rAttachPoint.position;
       Quaternion rot = rAttachPoint.rotation * sm_OrientationAdjust;
 
-      if (m_BimanualTape)
-      {
-        ApplyBimanualTape(ref pos, ref rot);
-        ApplyRevolver(ref pos, ref rot);
-      }
-      else
-      {
-			  ApplyLazyInput(ref pos, ref rot);
+      // Modify pointer position and rotation with stencils.
+      WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);
 
-        // Modify pointer position and rotation with stencils.
-        WidgetManager.m_Instance.MagnetizeToStencils(ref pos, ref rot);
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      if (Config.IsExperimental)
+      {
+        if (m_BimanualTape)
+        {
+          ApplyBimanualTape(ref pos, ref rot);
+          ApplyRevolver(ref pos, ref rot);
+        }
+        else
+        {
+          ApplyLazyInput(ref pos, ref rot);
+        }
       }
+#endif
 
       PointerManager.m_Instance.SetPointerTransform(InputManager.ControllerName.Brush, pos, rot);
     }

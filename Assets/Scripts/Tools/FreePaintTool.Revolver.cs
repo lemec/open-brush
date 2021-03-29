@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+using UnityEngine;
 
 namespace TiltBrush
 {
@@ -77,3 +78,5 @@ namespace TiltBrush
     }
   }
 }
+
+#endif // #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)

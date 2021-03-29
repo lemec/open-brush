@@ -2417,21 +2417,23 @@ namespace TiltBrush
       }
     }
 
-    bool CheckToggleTiltProtection()
-    {
-      if (
-        !InGrabCanvasMode && 
-        InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.AltActivate)
-      )
+		#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      bool CheckToggleTiltProtection()
       {
-        App.Scene.disableTiltProtection = !App.Scene.disableTiltProtection;
+        if (
+          !InGrabCanvasMode && 
+          InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.Redo)
+        )
+        {
+          App.Scene.disableTiltProtection = !App.Scene.disableTiltProtection;
 
-        return !App.Scene.disableTiltProtection;
+          return !App.Scene.disableTiltProtection;
+        }
+
+        return false;
+
       }
-
-      return false;
-
-    }
+#endif
 
     void UpdateGrab_World()
     {
@@ -2529,13 +2531,24 @@ namespace TiltBrush
             }
             else
             {
-              bool fixOffset = CheckToggleTiltProtection();
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+              bool fixOffset = false;
+
+              if (Config.IsExperimental)
+              {
+                fixOffset = CheckToggleTiltProtection();
+              }
+#endif
 
               xfNew = MathUtils.TwoPointObjectTransformation(
                   m_GrabBrush.grabTransform, m_GrabWand.grabTransform,
                   grabXfBrush, grabXfWand,
                   xfOld,
-                  rotationAxisConstraint: (App.Scene.disableTiltProtection ? default(Vector3) : Vector3.up),
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+                rotationAxisConstraint: (Config.IsExperimental && App.Scene.disableTiltProtection ? default(Vector3) : Vector3.up),
+#else
+                rotationAxisConstraint: Vector3.up,
+#endif
                   deltaScaleMin: deltaScaleMin, deltaScaleMax: deltaScaleMax);
               float fCurrentWorldTransformSpeed =
                   Mathf.Abs((xfNew.scale - xfOld.scale) / Time.deltaTime);
@@ -2547,21 +2560,26 @@ namespace TiltBrush
                   AudioManager.m_Instance.m_WorldGrabLoopAttenuation, 0f,
                   AudioManager.m_Instance.m_WorldGrabLoopMaxVolume));
 
-              if (fixOffset)
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+              if (Config.IsExperimental)
               {
-                Vector3 midPoint = Vector3.Lerp(grabXfBrush.translation, grabXfWand.translation, 0.5f);
+                if (fixOffset)
+                {
+                  Vector3 midPoint = Vector3.Lerp(grabXfBrush.translation, grabXfWand.translation, 0.5f);
 
-                Vector3 localMidPointOldXF = xfOld.inverse * midPoint;
+                  Vector3 localMidPointOldXF = xfOld.inverse * midPoint;
 
-                // assign this to force the axial protection
-                GrabbedPose = xfNew;
-                xfNew = GrabbedPose;
+                  // assign this to force the axial protection
+                  GrabbedPose = xfNew;
+                  xfNew = GrabbedPose;
 
-                Vector3 midPointXFNew = xfNew * localMidPointOldXF;
+                  Vector3 midPointXFNew = xfNew * localMidPointOldXF;
 
-								TrTransform xfDelta1 = TrTransform.T(midPoint - midPointXFNew);
-                xfNew = xfDelta1 * xfNew;
+                  TrTransform xfDelta1 = TrTransform.T(midPoint - midPointXFNew);
+                  xfNew = xfDelta1 * xfNew;
+                }
               }
+#endif
             }
             GrabbedPose = xfNew;
 

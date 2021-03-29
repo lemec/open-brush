@@ -1229,6 +1229,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 1
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0.05
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 2103185552}
   m_ToolDescriptionText: {fileID: 1589753392}
   m_SizeRange: {x: 0.05, y: 0.3}
@@ -6390,6 +6391,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 1
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0.05
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 1093897235}
   m_ToolDescriptionText: {fileID: 382819200}
   m_SizeRange: {x: 0.1, y: 0.3}
@@ -11459,6 +11461,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 1
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 1399244134}
   m_ToolDescriptionText: {fileID: 584147936}
   m_SizeRange: {x: 0.1, y: 0.3}
@@ -12117,10 +12120,6 @@ MonoBehaviour:
   m_ShowTransformGizmo: 0
   m_ExitOnAbortCommand: 1
   m_ScalingSupported: 1
-  m_AdjustSizeScalar: 1.5
-  m_HapticInterval: 0.2
-  m_HapticSizeUp: 0.08
-  m_HapticSizeDown: 0.06
   m_BimanualGuideLine: {fileID: 1029841512}
   m_BimanualGuideLineOutline: {fileID: 309623949}
   m_BimanualGuideIntersect: {fileID: 1712388237}
@@ -12130,6 +12129,10 @@ MonoBehaviour:
   m_BimanualGuideLineBaseWidth: 0.025
   m_BimanualGuideHintIntensity: 0.75
   m_BimanualGuideDrawInDuration: 0.3
+  m_AdjustSizeScalar: 1.5
+  m_HapticInterval: 0.2
+  m_HapticSizeUp: 0.08
+  m_HapticSizeDown: 0.06
 --- !u!4 &851670923 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 95a90b84ee174bd489f097b871d49986,
@@ -13186,6 +13189,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 0
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0.1
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 1541150095}
   m_ToolDescriptionText: {fileID: 1687766715}
   m_SizeRange: {x: 0.1, y: 0.38}
@@ -18098,6 +18102,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 2
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0.22
+  m_BatchFilter: {fileID: 0}
   m_DropperTransform: {fileID: 1149162873}
   m_DropperConeRenderer: {fileID: 1764411095}
   m_DropperRenderer: {fileID: 287115357}
@@ -19311,6 +19316,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 0
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0.1
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 160917794}
   m_ToolDescriptionText: {fileID: 2106961887}
   m_SizeRange: {x: 0.1, y: 0.5}
@@ -21303,6 +21309,7 @@ MonoBehaviour:
   m_IntersectionResetBehavior: 1
   m_TimeSliceInMS: 0.5
   m_PointerForwardOffset: 0
+  m_BatchFilter: {fileID: 0}
   m_ToolTransform: {fileID: 151850537}
   m_ToolDescriptionText: {fileID: 747007960}
   m_SizeRange: {x: 0.1, y: 0.3}
