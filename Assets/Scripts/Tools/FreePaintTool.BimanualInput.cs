@@ -42,6 +42,10 @@ namespace TiltBrush {
     public float m_brushTriggerRatio { get; private set; }
     public float m_wandTriggerRatio { get; private set; }
 
+    override public bool AllowWorldTransformation() {
+      return !m_BimanualTape;
+    }
+
     private void InitBimanualTape() {
       m_BimanualTape = false;
 

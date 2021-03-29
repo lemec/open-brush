@@ -84,7 +84,7 @@ namespace TiltBrush {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
       if (Config.IsExperimental) {
 
-        if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger)
+        if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger && !InputManager.Wand.GetControllerGrip())
           BeginBimanualTape();
 
         m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
