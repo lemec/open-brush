@@ -61,11 +61,18 @@ namespace TiltBrush
     {
       // Don't call base.UpdateTool() because we have a different 'stop eating input' check
       // for FreePaintTool.
-      m_brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
       m_wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
-      m_brushTrigger = m_brushTriggerRatio > 0;
+      m_wandTrigger = InputManager.Wand.GetCommand(InputManager.SketchCommands.Activate);
+      m_wandTriggerDown = InputManager.Wand.GetCommandDown(InputManager.SketchCommands.Activate);
 
-      if (m_EatInput && m_brushTriggerRatio <= 0.0f)
+      m_brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
+      m_brushTrigger = InputManager.Brush.GetCommand(InputManager.SketchCommands.Activate);
+      m_brushTriggerDown = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Activate);
+
+      m_brushUndoButton = InputManager.Brush.GetCommand(InputManager.SketchCommands.Undo);
+      m_brushUndoButtonDown = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Undo);
+
+      if (m_EatInput && !m_brushTrigger)
         m_EatInput = false;
 
       if (m_ExitOnAbortCommand && InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.Abort))
@@ -73,10 +80,10 @@ namespace TiltBrush
 
       PositionPointer();
 
-      if (!m_BimanualTape && !m_PaintingActive && m_wandTriggerRatio > 0)
+      if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger)
         BeginBimanualTape();
 
-      m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
+      m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
 
       if (m_BimanualTape)
       {
@@ -88,9 +95,12 @@ namespace TiltBrush
           UpdateBimanualGuideVisuals();
 
           UpdateBimanualIntersectVisuals();
+
+          if (m_brushUndoButtonDown)
+            BeginRevolver();
         }
       }
-      else if (InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Undo))
+      else if (m_brushUndoButtonDown)
         m_lazyInput = !m_lazyInput;
 
       PointerManager.m_Instance.EnableLine(m_PaintingActive);
@@ -141,7 +151,10 @@ namespace TiltBrush
       Quaternion rot = rAttachPoint.rotation * sm_OrientationAdjust;
 
       if (m_BimanualTape)
+      {
         ApplyBimanualTape(ref pos, ref rot);
+        ApplyRevolver(ref pos, ref rot);
+      }
       else
       {
 			  ApplyLazyInput(ref pos, ref rot);

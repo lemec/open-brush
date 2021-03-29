@@ -33,7 +33,12 @@ namespace TiltBrush
 
     Vector3 m_btIntersectGoal;
     public bool m_brushTrigger { get; private set; }
+    public bool m_brushTriggerDown { get; private set; }
     public bool m_wandTrigger { get; private set; }
+    public bool m_wandTriggerDown { get; private set; }
+
+    public bool m_brushUndoButton { get; private set; }
+    public bool m_brushUndoButtonDown { get; private set; }
     public float m_brushTriggerRatio { get; private set; }
     public float m_wandTriggerRatio { get; private set; }
 
@@ -57,6 +62,8 @@ namespace TiltBrush
     private void BeginBimanualTape()
     {
       m_BimanualTape = true;
+      m_RevolverActive = false;
+
       Transform rAttachPoint = InputManager.m_Instance.GetBrushControllerAttachPoint();
 
       m_btIntersectGoal = m_btCursorPos = rAttachPoint.position;			
@@ -199,7 +206,7 @@ namespace TiltBrush
 
       Transform lAttachPoint = InputManager.m_Instance.GetWandControllerAttachPoint();
       Vector3 lPos = lAttachPoint.position;
-      Quaternion lrot = lAttachPoint.rotation * sm_OrientationAdjust;
+      // Quaternion lrot = lAttachPoint.rotation * sm_OrientationAdjust;
 
       Vector3 deltaPos = lPos - m_btCursorPos;
       Vector3 deltaBTCursor = pos - m_btCursorPos;
