@@ -2102,6 +2102,11 @@ namespace TiltBrush {
       m_WorldTransformResetXf =
         toSavedXf ? SketchMemoryScript.m_Instance.InitialSketchTransform : TrTransform.identity;
       m_WorldTransformResetState = WorldTransformResetState.Requested;
+
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      if (Config.IsExperimental)
+        App.Scene.disableTiltProtection = false;
+#endif
     }
 
     void UpdateWorldTransformReset() {
@@ -2139,7 +2144,10 @@ namespace TiltBrush {
     bool CheckToggleTiltProtection() {
       if (
         !InGrabCanvasMode &&
-        InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.Redo)
+        (
+        InputManager.Wand.GetCommandDown(InputManager.SketchCommands.Redo) ||
+        InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Redo)
+        )
       ) {
         App.Scene.disableTiltProtection = !App.Scene.disableTiltProtection;
 
