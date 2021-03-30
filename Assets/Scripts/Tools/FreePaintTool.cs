@@ -50,6 +50,13 @@ namespace TiltBrush {
       if (!bEnable) {
         PointerManager.m_Instance.EnableLine(false);
         WidgetManager.m_Instance.ResetActiveStencil();
+
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+        if (Config.IsExperimental) {
+          EndBimanualTape();
+          EndBimanualIntersect();
+        }
+#endif
       }
       m_PaintingActive = false;
     }
@@ -62,15 +69,15 @@ namespace TiltBrush {
     override public void UpdateTool() {
       // Don't call base.UpdateTool() because we have a different 'stop eating input' check
       // for FreePaintTool.
-      m_wandTriggerRatio = InputManager.Wand.GetTriggerRatio();
-      m_wandTrigger = InputManager.Wand.GetCommand(InputManager.SketchCommands.Activate);
-      m_wandTriggerDown = InputManager.Wand.GetCommandDown(InputManager.SketchCommands.Activate);
+      m_wandTriggerRatio    = InputManager.Wand.GetTriggerRatio();
+      m_wandTrigger         = InputManager.Wand.GetCommand(InputManager.SketchCommands.Activate);
+      m_wandTriggerDown     = InputManager.Wand.GetCommandDown(InputManager.SketchCommands.Activate);
 
-      m_brushTriggerRatio = InputManager.Brush.GetTriggerRatio();
-      m_brushTrigger = InputManager.Brush.GetCommand(InputManager.SketchCommands.Activate);
-      m_brushTriggerDown = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Activate);
+      m_brushTriggerRatio   = InputManager.Brush.GetTriggerRatio();
+      m_brushTrigger        = InputManager.Brush.GetCommand(InputManager.SketchCommands.Activate);
+      m_brushTriggerDown    = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Activate);
 
-      m_brushUndoButton = InputManager.Brush.GetCommand(InputManager.SketchCommands.Undo);
+      m_brushUndoButton     = InputManager.Brush.GetCommand(InputManager.SketchCommands.Undo);
       m_brushUndoButtonDown = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Undo);
 
       if (m_EatInput && !m_brushTrigger)
@@ -87,7 +94,7 @@ namespace TiltBrush {
         if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger && !InputManager.Wand.GetControllerGrip())
           BeginBimanualTape();
 
-        m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_lazyInput && m_BimanualTape && m_wandTrigger));
+        m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_LazyInputActive && m_BimanualTape && m_wandTrigger));
 
         if (m_BimanualTape) {
           if (!m_wandTrigger && !m_brushTrigger)
@@ -103,7 +110,7 @@ namespace TiltBrush {
           }
         }
         else if (m_brushUndoButtonDown)
-          m_lazyInput = !m_lazyInput;
+          m_LazyInputActive = !m_LazyInputActive;
       }
       else
         m_PaintingActive = !m_EatInput && !m_ToolHidden && m_brushTrigger;
@@ -138,6 +145,19 @@ namespace TiltBrush {
           }
           else {
             InputManager.Brush.Geometry.ShowBrushSizer();
+
+
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+            if (Config.IsExperimental) {
+              if (m_BimanualTape)
+								InputManager.Brush.Geometry.TogglePadRevolverHint(m_RevolverActive, enabled: true);
+              else
+                InputManager.Brush.Geometry.TogglePadLazyInputHint(m_LazyInputActive, enabled: true);
+            }
+#endif
+
+
+
           }
         }
       }

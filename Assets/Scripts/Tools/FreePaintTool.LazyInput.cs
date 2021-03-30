@@ -5,12 +5,12 @@ using UnityEngine;
 namespace TiltBrush {
 
   public partial class FreePaintTool {
-    private bool m_lazyInput;
+    private bool m_LazyInputActive;
     private bool m_showLazyInputVisuals;
     private float m_lazyInputRate;
 
     void UpdateLazyInputRate() {
-      if (!m_lazyInput) {
+      if (!m_LazyInputActive) {
         m_lazyInputRate = 1;
         return;
       }
@@ -23,7 +23,7 @@ namespace TiltBrush {
     }
 
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot) {
-      if (!m_PaintingActive || !m_lazyInput) {
+      if (!m_PaintingActive || !m_LazyInputActive) {
         m_btCursorPos = pos;
         m_btCursorRot = rot;
         m_lazyInputRate = 0;

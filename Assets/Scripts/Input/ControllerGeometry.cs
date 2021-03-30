@@ -560,6 +560,43 @@ public class ControllerGeometry : MonoBehaviour {
     // Toggles the little auxillary "lock" icon for snapping.
     // Enabled indicates if the icon should be shown at all, where snappingOn indicates whether the
     // open lock or closed lock icon should be shown.
+    public void TogglePadLazyInputHint(bool lazyInput, bool enabled) {
+      Material padMat = lazyInput ? Materials.LazyInputOn : Materials.LazyInputOff;
+      switch (Style) {
+        case ControllerStyle.Vive:
+        case ControllerStyle.Wmr:
+        case ControllerStyle.LogitechPen:
+          Materials.Assign(PadMesh, enabled ? padMat : Materials.Standard);
+          break;
+        case ControllerStyle.OculusTouch:
+        case ControllerStyle.Knuckles:
+          Materials.Assign(Button01Mesh, enabled ? padMat : Materials.Blank);
+          break;
+      }
+    }
+
+
+    // Toggles the little auxillary "lock" icon for snapping.
+    // Enabled indicates if the icon should be shown at all, where snappingOn indicates whether the
+    // open lock or closed lock icon should be shown.
+    public void TogglePadRevolverHint(bool revolverActive, bool enabled) {
+      Material padMat = revolverActive ? Materials.RevolverRadius : Materials.WorldTransformReset;
+      switch (Style) {
+        case ControllerStyle.Vive:
+        case ControllerStyle.Wmr:
+        case ControllerStyle.LogitechPen:
+          Materials.Assign(PadMesh, enabled ? padMat : Materials.Standard);
+          break;
+        case ControllerStyle.OculusTouch:
+        case ControllerStyle.Knuckles:
+          Materials.Assign(Button01Mesh, enabled ? padMat : Materials.Blank);
+          break;
+      }
+    }
+
+    // Toggles the little auxillary "lock" icon for snapping.
+    // Enabled indicates if the icon should be shown at all, where snappingOn indicates whether the
+    // open lock or closed lock icon should be shown.
     public void ShowWorldTransformReset() {
 
       Material padMat = App.Scene.disableTiltProtection ? Materials.SnapOff : Materials.SnapOn;
