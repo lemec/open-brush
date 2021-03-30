@@ -30,6 +30,15 @@ namespace TiltBrush {
 
     private bool m_PaintingActive;
 
+    public bool m_brushTrigger { get; private set; }
+    public bool m_brushTriggerDown { get; private set; }
+    public bool m_wandTrigger { get; private set; }
+    public bool m_wandTriggerDown { get; private set; }
+
+    public bool m_brushUndoButton { get; private set; }
+    public bool m_brushUndoButtonDown { get; private set; }
+    public float m_brushTriggerRatio { get; private set; }
+    public float m_wandTriggerRatio { get; private set; }
 
     override public void Init() {
       base.Init();
@@ -109,8 +118,14 @@ namespace TiltBrush {
               BeginRevolver();
           }
         }
-        else if (m_brushUndoButtonDown)
-          m_LazyInputActive = !m_LazyInputActive;
+        else if (m_brushUndoButtonDown) {
+          if (m_brushTrigger) {
+            if (m_LazyInputActive)
+              m_LazyInputTangentMode = !m_LazyInputTangentMode;
+          }
+          else
+            m_LazyInputActive = !m_LazyInputActive;
+        }
       }
       else
         m_PaintingActive = !m_EatInput && !m_ToolHidden && m_brushTrigger;
@@ -152,7 +167,7 @@ namespace TiltBrush {
               if (m_BimanualTape)
 								InputManager.Brush.Geometry.TogglePadRevolverHint(m_RevolverActive, enabled: true);
               else
-                InputManager.Brush.Geometry.TogglePadLazyInputHint(m_LazyInputActive, enabled: true);
+                InputManager.Brush.Geometry.TogglePadLazyInputHint(m_LazyInputActive, m_LazyInputTangentMode, enabled: true);
             }
 #endif
 

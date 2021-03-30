@@ -60,7 +60,7 @@ namespace TiltBrush {
 
       private TrTransform Trail() {
 
-        return LazyLerp(transformTr, goalTr, lerpT);
+        return LazyLerp(transformTr, goalTr, lerpT, m_LazyInputTangentMode);
       }
 
       private float _lerpT;

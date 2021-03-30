@@ -6,6 +6,7 @@ namespace TiltBrush {
 
   public partial class FreePaintTool {
     private bool m_LazyInputActive;
+    private static bool m_LazyInputTangentMode;
     private bool m_showLazyInputVisuals;
     private float m_lazyInputRate;
 
@@ -22,7 +23,7 @@ namespace TiltBrush {
       m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
     }
 
-    private static TrTransform LazyLerp(TrTransform startTx, TrTransform endTx, float lerpT) {
+    private static TrTransform TangentLazyLerp (TrTransform startTx, TrTransform endTx, float lerpT) {
       Vector3 beeline = endTx.translation - startTx.translation;
 
       Vector3 startCursorNormal = startTx.rotation * Vector3.forward;
@@ -47,6 +48,28 @@ namespace TiltBrush {
 
       );
       return result;
+    }
+
+    private static TrTransform NormalLazyLerp(TrTransform startTx, TrTransform endTx, float lerpT) {
+      Vector3 beeline = endTx.translation - startTx.translation;
+
+      TrTransform result = TrTransform.TRS(
+
+        Vector3.Lerp(startTx.translation, endTx.translation, lerpT),
+
+        Quaternion.Slerp(startTx.rotation, endTx.rotation, lerpT),
+
+        Mathf.Lerp(startTx.scale, endTx.scale, lerpT)
+
+      );
+      return result;
+    }
+
+    private static TrTransform LazyLerp(TrTransform startTx, TrTransform endTx, float lerpT, bool tangentMode) {
+      if (tangentMode)
+        return TangentLazyLerp(startTx, endTx, lerpT);
+      else
+        return NormalLazyLerp(startTx, endTx, lerpT);
     }
 
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot) {
@@ -85,7 +108,7 @@ namespace TiltBrush {
       //// }
 
 
-      TrTransform result = LazyLerp(TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), TrTransform.TRS(pos, rot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), m_lazyInputRate);
+      TrTransform result = LazyLerp(TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), TrTransform.TRS(pos, rot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), m_lazyInputRate, m_LazyInputTangentMode);
 
       m_btCursorPos = result.translation;
       m_btCursorRot = result.rotation;

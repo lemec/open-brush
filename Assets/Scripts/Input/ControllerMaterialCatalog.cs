@@ -51,6 +51,9 @@ public class ControllerMaterialCatalog : MonoBehaviour {
     [SerializeField] private Material m_LazyInputOn;
     [CatalogMaterial] public Material LazyInputOn { get; private set; }
 
+    [SerializeField] private Material m_LazyInputAltOn;
+    [CatalogMaterial] public Material LazyInputAltOn { get; private set; }
+
     [SerializeField] private Material m_LazyInputOff;
     [CatalogMaterial] public Material LazyInputOff { get; private set; }
 

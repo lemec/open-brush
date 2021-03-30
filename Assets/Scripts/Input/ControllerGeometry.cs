@@ -560,8 +560,8 @@ public class ControllerGeometry : MonoBehaviour {
     // Toggles the little auxillary "lock" icon for snapping.
     // Enabled indicates if the icon should be shown at all, where snappingOn indicates whether the
     // open lock or closed lock icon should be shown.
-    public void TogglePadLazyInputHint(bool lazyInput, bool enabled) {
-      Material padMat = lazyInput ? Materials.LazyInputOn : Materials.LazyInputOff;
+    public void TogglePadLazyInputHint(bool lazyInput, bool altMode, bool enabled) {
+      Material padMat = lazyInput ? altMode ? Materials.LazyInputAltOn : Materials.LazyInputOn : Materials.LazyInputOff;
       switch (Style) {
         case ControllerStyle.Vive:
         case ControllerStyle.Wmr:

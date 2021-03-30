@@ -32,16 +32,6 @@ namespace TiltBrush {
     private Quaternion m_btCursorRot;
 
     Vector3 m_btIntersectGoal;
-    public bool m_brushTrigger { get; private set; }
-    public bool m_brushTriggerDown { get; private set; }
-    public bool m_wandTrigger { get; private set; }
-    public bool m_wandTriggerDown { get; private set; }
-
-    public bool m_brushUndoButton { get; private set; }
-    public bool m_brushUndoButtonDown { get; private set; }
-    public float m_brushTriggerRatio { get; private set; }
-    public float m_wandTriggerRatio { get; private set; }
-
     override public bool AllowWorldTransformation() {
       return !m_BimanualTape;
     }
