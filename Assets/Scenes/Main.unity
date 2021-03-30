@@ -2474,7 +2474,7 @@ GameObject:
   - component: {fileID: 112854973}
   - component: {fileID: 112854972}
   m_Layer: 14
-  m_Name: GuideCubeOutline A
+  m_Name: GuideMarkerOutline A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2540,7 +2540,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 112854970}
-  m_Mesh: {fileID: 4300000, guid: 954c67d0e13c2594e808082b9bc1bb07, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!224 &116898358
 RectTransform:
   m_ObjectHideFlags: 0
@@ -7477,7 +7477,7 @@ GameObject:
   - component: {fileID: 415778232}
   - component: {fileID: 415778231}
   m_Layer: 14
-  m_Name: GuideCube D
+  m_Name: GuideMarker D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7543,7 +7543,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 415778229}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1001 &420987293
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11033,7 +11033,7 @@ GameObject:
   - component: {fileID: 697818380}
   - component: {fileID: 697818379}
   m_Layer: 14
-  m_Name: GuideCube B
+  m_Name: GuideMarker B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11099,7 +11099,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 697818377}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1001 &729042392
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11577,7 +11577,7 @@ GameObject:
   - component: {fileID: 798356492}
   - component: {fileID: 798356491}
   m_Layer: 14
-  m_Name: GuideCubeOutline C
+  m_Name: GuideMarkerOutline C
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -11643,7 +11643,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 798356489}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &802990453
 GameObject:
   m_ObjectHideFlags: 0
@@ -12697,7 +12697,7 @@ GameObject:
   - component: {fileID: 874159531}
   - component: {fileID: 874159530}
   m_Layer: 14
-  m_Name: GuideCube C
+  m_Name: GuideMarker C
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12763,7 +12763,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 874159528}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &879359715
 GameObject:
   m_ObjectHideFlags: 0
@@ -15814,7 +15814,7 @@ GameObject:
   - component: {fileID: 1206152179}
   - component: {fileID: 1206152178}
   m_Layer: 14
-  m_Name: GuideCubeOutline D
+  m_Name: GuideMarkerOutline D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15880,7 +15880,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1206152176}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &1209128955
 GameObject:
   m_ObjectHideFlags: 0
@@ -15953,7 +15953,7 @@ GameObject:
   - component: {fileID: 1209446977}
   - component: {fileID: 1209446976}
   m_Layer: 14
-  m_Name: GuideCubeOutline E
+  m_Name: GuideMarkerOutline E
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -16019,7 +16019,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1209446974}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &1213600507
 GameObject:
   m_ObjectHideFlags: 0
@@ -19155,7 +19155,7 @@ GameObject:
   - component: {fileID: 1474919595}
   - component: {fileID: 1474919594}
   m_Layer: 14
-  m_Name: GuideCubeOutline B
+  m_Name: GuideMarkerOutline B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -19221,7 +19221,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1474919592}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &1476953170
 GameObject:
   m_ObjectHideFlags: 0
@@ -30271,7 +30271,7 @@ GameObject:
   - component: {fileID: 1883778815}
   - component: {fileID: 1883778814}
   m_Layer: 14
-  m_Name: GuideCube E
+  m_Name: GuideMarker E
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30337,7 +30337,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1883778812}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &1886338616
 GameObject:
   m_ObjectHideFlags: 0
@@ -31658,7 +31658,7 @@ GameObject:
   - component: {fileID: 1979422289}
   - component: {fileID: 1979422288}
   m_Layer: 14
-  m_Name: GuideCube A
+  m_Name: GuideMarker A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31724,7 +31724,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1979422286}
-  m_Mesh: {fileID: 4300000, guid: 954c67d0e13c2594e808082b9bc1bb07, type: 3}
+  m_Mesh: {fileID: 4300000, guid: 20b1c3d24ef5d584196d13565a56bc67, type: 3}
 --- !u!1 &1981107083
 GameObject:
   m_ObjectHideFlags: 0

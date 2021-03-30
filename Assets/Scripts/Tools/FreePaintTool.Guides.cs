@@ -5,24 +5,24 @@ using System.Collections.Generic;
 namespace TiltBrush {
   public partial class FreePaintTool {
     [SerializeField] private List<Transform> m_GuideCubes;
-    [SerializeField] private List<Transform> m_GuideCubeOutlines;
+    // [SerializeField] private List<Transform> m_GuideCubeOutlines;
 
     public class GuideCube {
       public Transform cubeTx;
       public Renderer cubeRenderer;
 
-      public Transform cubeOutlineTx;
-      public Renderer cubeOutlineRenderer;
+      // public Transform cubeOutlineTx;
+      // public Renderer cubeOutlineRenderer;
+      // 
+      // public const float OutlineWidth = 0.1f;
+      // public const float BaseThickness = 0.025f;
 
-      public const float OutlineWidth = 0.1f;
-      public const float BaseThickness = 0.025f;
-
-      public GuideCube(Transform transform, Transform transformOutline) {
+      public GuideCube(Transform transform) { // , Transform transformOutline
         this.cubeTx = transform;
         cubeRenderer = transform.GetComponent<Renderer>();
 
-        this.cubeOutlineTx = transformOutline;
-        cubeOutlineRenderer = transformOutline.GetComponent<Renderer>();
+        // this.cubeOutlineTx = transformOutline;
+        // cubeOutlineRenderer = transformOutline.GetComponent<Renderer>();
       }
 
       private bool _enabled;
@@ -33,7 +33,7 @@ namespace TiltBrush {
         set {
           _enabled = value;
           cubeRenderer.enabled = _enabled;
-          cubeOutlineRenderer.enabled = _enabled;
+          // cubeOutlineRenderer.enabled = _enabled;
         }
       }
 
@@ -57,8 +57,14 @@ namespace TiltBrush {
         Vector3 radialOffset = spindleRotation * radialLookRot * Vector3.forward;
         result.translation = transform.translation + radialOffset * radius;
 
-        Quaternion pointerRotation = spindleRotation * radialLookRot * tilt;
+        Quaternion pointerRotation = spindleRotation * radialLookRot * tilt;        
+
         result.rotation = pointerRotation;
+
+        // Vector3 virtualBrushNormal = pointerRotation * Vector3.forward;
+        // Vector3 tangent = spindleRotation * radialLookRot * Vector3.right;
+
+        // result.rotation = Quaternion.LookRotation(tangent, virtualBrushNormal);
 
         result.scale = transform.scale;
 
@@ -95,15 +101,15 @@ namespace TiltBrush {
 
             cubeTx.transform.position = result.translation;
             cubeTx.transform.rotation = result.rotation;
-            cubeTx.transform.localScale = new Vector3(BaseThickness, BaseThickness, result.scale);
+            cubeTx.transform.localScale = Vector3.one * result.scale;
 
             
-            cubeOutlineTx.transform.position = result.translation;
-            cubeOutlineTx.transform.rotation = result.rotation;
-
-            float OutlineThickness = OutlineWidth + BaseThickness;
-            float OutlineLength = OutlineWidth * Mathf.Min(1.0f, 1.0f / result.scale) + result.scale;
-            cubeOutlineTx.transform.localScale = new Vector3(OutlineThickness, OutlineThickness, OutlineLength);
+            // cubeOutlineTx.transform.position = result.translation;
+            // cubeOutlineTx.transform.rotation = result.rotation;
+            // 
+            // float OutlineThickness = OutlineWidth + BaseThickness;
+            // float OutlineLength = OutlineWidth * Mathf.Min(1.0f, 1.0f / result.scale) + result.scale;
+            // cubeOutlineTx.transform.localScale = new Vector3(OutlineLength, OutlineThickness, OutlineThickness);
             break;
           default:
             break;
@@ -120,7 +126,7 @@ namespace TiltBrush {
       _guideCubes = new List<GuideCube>();
 
       for (int i = 0; i < m_GuideCubes.Count; i++) {
-        _guideCubes.Add(new GuideCube(m_GuideCubes[i], m_GuideCubeOutlines[i]));
+        _guideCubes.Add(new GuideCube(m_GuideCubes[i])); // , m_GuideCubeOutlines[i]
       }
     }
 
