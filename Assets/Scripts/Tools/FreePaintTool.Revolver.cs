@@ -20,7 +20,7 @@ namespace TiltBrush {
 
       SetRevolverRadius(1);
 
-      GuideCubesBegin();
+      BeginGuideMarkers(GuideMarker.PathModeID.Orbit);
     }
 
     private void SetRevolverRadius(float lerpRate) {
@@ -28,7 +28,7 @@ namespace TiltBrush {
       Vector3 brushDelta = m_btIntersectGoal - brushAttachTransform.position;
       m_RevolverRadius = Mathf.Lerp(m_RevolverRadius, brushDelta.magnitude, lerpRate);
 
-      GuideCubeOrbitalRadius = m_RevolverRadius;
+      GuideMarkerOrbitalRadius = m_RevolverRadius;
     }
 
     private void ApplyRevolver(ref Vector3 pos, ref Quaternion rot) {
@@ -65,7 +65,7 @@ namespace TiltBrush {
 
         m_RevolverBrushRotationOffset = radialLookRot.TrueInverse() * brushWorldRotation;
 
-        GuideCubeTilt = m_RevolverBrushRotationOffset;
+        GuideMarkerTilt = m_RevolverBrushRotationOffset;
 
         if (m_RevolverVelocity == 0)
           m_RevolverAngle = 0;
@@ -84,8 +84,8 @@ namespace TiltBrush {
       pos = (m_brushTrigger && !m_LazyInputActive ? m_btCursorPos : m_btIntersectGoal) + revolverOffset;
       rot = m_btCursorRot;
 
-      GuideCubeTransform = TrTransform.TRS(m_btIntersectGoal, Quaternion.LookRotation(radialDelta.normalized, guideDelta), PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
-      GuideCubeLerpT = (GuideCubeLerpT + Time.deltaTime * 0.25f) % 1f;
+      GuideMarkerTransform = TrTransform.TRS(m_btIntersectGoal, Quaternion.LookRotation(radialDelta.normalized, guideDelta), PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      GuideMarkerLerpT = (GuideMarkerLerpT + Time.deltaTime * 0.25f) % 1f;
     }
   }
 }

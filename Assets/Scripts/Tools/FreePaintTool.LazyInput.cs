@@ -22,6 +22,33 @@ namespace TiltBrush {
       m_lazyInputRate = Mathf.MoveTowards(m_lazyInputRate, lerpRateGoal, Time.deltaTime * 0.01f);
     }
 
+    private static TrTransform LazyLerp(TrTransform startTx, TrTransform endTx, float lerpT) {
+      Vector3 beeline = endTx.translation - startTx.translation;
+
+      Vector3 startCursorNormal = startTx.rotation * Vector3.forward;
+      Vector3 endCursorNormal = endTx.rotation * Vector3.forward;
+
+      Vector3 forwardDelta = Vector3.ProjectOnPlane(beeline, startCursorNormal);
+      Vector3 midPointDelta = Vector3.Project(Vector3.ProjectOnPlane(beeline, endCursorNormal), forwardDelta.normalized);
+
+      float midPointLerp = Mathf.InverseLerp(0, beeline.magnitude, Vector3.Project(midPointDelta, beeline.normalized).magnitude);
+
+      float beelineTangentDot = Mathf.Abs(Vector3.Dot(beeline.normalized, startCursorNormal));
+
+      Vector3 moveDelta = Vector3.Lerp(Vector3.zero, Vector3.Lerp(midPointDelta, beeline, midPointLerp), lerpT);
+
+      TrTransform result = TrTransform.TRS(
+
+        startTx.translation + Vector3.Lerp(moveDelta, Vector3.zero, beelineTangentDot),
+
+        Quaternion.Slerp(startTx.rotation, endTx.rotation, Mathf.Lerp(midPointLerp, 1, beelineTangentDot) * lerpT),
+
+        Mathf.Lerp(startTx.scale, endTx.scale, lerpT)
+
+      );
+      return result;
+    }
+
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot) {
       if (!m_PaintingActive || !m_LazyInputActive) {
         m_btCursorPos = pos;
@@ -32,17 +59,36 @@ namespace TiltBrush {
         return;
       }
 
-      Vector3 deltaPos = pos - m_btCursorPos;
-
       UpdateLazyInputRate();
 
-      Vector3 deltaBTCursor = Vector3.Lerp(Vector3.zero, deltaPos, m_lazyInputRate);
+      //Vector3 beeline = pos - m_btCursorPos;
+      //
+      //// Vector3 beelineDelta = Vector3.Lerp(Vector3.zero, beeline, m_lazyInputRate);
+      //
+      //Vector3 oldCursorNormal = m_btCursorRot * Vector3.forward;
+      //Vector3 newCursorNormal = rot * Vector3.forward;
+      //
+      //Vector3 forwardDelta = Vector3.ProjectOnPlane(beeline, oldCursorNormal);
+      //Vector3 midPointDelta = Vector3.Project(Vector3.ProjectOnPlane(beeline, newCursorNormal), forwardDelta.normalized);
+      //
+      //float midPointLerp = Mathf.InverseLerp(0, beeline.magnitude, Vector3.Project(midPointDelta, beeline.normalized).magnitude);
+      //
+      //m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, Mathf.Lerp(midPointLerp, 1, Mathf.Abs(Vector3.Dot(beeline.normalized, newCursorNormal))) * m_lazyInputRate);
+      //
+      //Vector3 posDelta = Vector3.Lerp(Vector3.zero, Vector3.Lerp(midPointDelta, beeline, midPointLerp), m_lazyInputRate);
+      //m_btCursorPos = m_btCursorPos + posDelta;
+      //
+      //// if (beelineDelta.magnitude > 0) {
+      ////   m_btCursorPos = m_btCursorPos + beelineDelta;
+      //// 
+      ////   m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, m_lazyInputRate);
+      //// }
 
-      if (deltaBTCursor.magnitude > 0) {
-        m_btCursorPos = m_btCursorPos + deltaBTCursor;
 
-        m_btCursorRot = Quaternion.Slerp(m_btCursorRot, rot, m_lazyInputRate);
-      }
+      TrTransform result = LazyLerp(TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), TrTransform.TRS(pos, rot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute), m_lazyInputRate);
+
+      m_btCursorPos = result.translation;
+      m_btCursorRot = result.rotation;
 
       pos = m_btCursorPos;
       rot = m_btCursorRot;
@@ -85,6 +131,11 @@ namespace TiltBrush {
 
       m_BimanualGuideLineRenderer.material.SetColor("_Color",
           SketchControlsScript.m_Instance.m_GrabHighlightActiveColor);
+
+      GuideMarkerTransform = TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      GuideMarkerGoal = TrTransform.TRS(brushAttachTransform.position, brushAttachTransform.rotation * sm_OrientationAdjust, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      GuideMarkerLerpT = (GuideMarkerLerpT + Time.deltaTime * 0.25f) % 1f;
+
     }
 
     private void BeginLazyInputVisuals() {
@@ -98,6 +149,8 @@ namespace TiltBrush {
       m_BimanualGuideIntensity = m_BimanualGuideHintIntensity;
       m_BimanualGuideLineRenderer.enabled = true;
       m_BimanualGuideLineOutlineRenderer.enabled = true;
+
+      BeginGuideMarkers(GuideMarker.PathModeID.Trail);
     }
 
     private void EndLazyInputVisuals() {
@@ -111,6 +164,8 @@ namespace TiltBrush {
       m_BimanualGuideLineT = 0.0f;
       m_BimanualGuideLineRenderer.enabled = false;
       m_BimanualGuideLineOutlineRenderer.enabled = false;
+
+			EndGuideMarkers();
     }
 
   }

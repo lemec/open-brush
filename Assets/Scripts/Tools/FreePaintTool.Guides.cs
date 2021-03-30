@@ -4,25 +4,16 @@ using System.Collections.Generic;
 
 namespace TiltBrush {
   public partial class FreePaintTool {
-    [SerializeField] private List<Transform> m_GuideCubes;
+    [SerializeField] private List<Transform> m_GuideMarkers;
     // [SerializeField] private List<Transform> m_GuideCubeOutlines;
 
-    public class GuideCube {
-      public Transform cubeTx;
-      public Renderer cubeRenderer;
+    public class GuideMarker {
+      public Transform markerTx;
+      public Renderer markerRenderer;
 
-      // public Transform cubeOutlineTx;
-      // public Renderer cubeOutlineRenderer;
-      // 
-      // public const float OutlineWidth = 0.1f;
-      // public const float BaseThickness = 0.025f;
-
-      public GuideCube(Transform transform) { // , Transform transformOutline
-        this.cubeTx = transform;
-        cubeRenderer = transform.GetComponent<Renderer>();
-
-        // this.cubeOutlineTx = transformOutline;
-        // cubeOutlineRenderer = transformOutline.GetComponent<Renderer>();
+      public GuideMarker(Transform transform) {
+        markerTx = transform;
+        markerRenderer = transform.GetComponent<Renderer>();
       }
 
       private bool _enabled;
@@ -32,43 +23,44 @@ namespace TiltBrush {
         }
         set {
           _enabled = value;
-          cubeRenderer.enabled = _enabled;
-          // cubeOutlineRenderer.enabled = _enabled;
+          markerRenderer.enabled = _enabled;
         }
       }
 
       public enum PathModeID {
-        Orbit
+        Orbit,
+        Trail
       }
 
       public PathModeID pathMode;
-      public TrTransform transform;
+      public TrTransform transformTr;
+      public TrTransform goalTr;
       public Quaternion tilt;
 
       private TrTransform Orbit(float radius) {
 
         TrTransform result = new TrTransform();
 
-        Vector3 spindleAxis = transform.rotation * Vector3.up;
+        Vector3 spindleAxis = transformTr.rotation * Vector3.up;
 
         Quaternion spindleRotation = Quaternion.AngleAxis(lerpT * -360, spindleAxis);
-        Quaternion radialLookRot = transform.rotation;
+        Quaternion radialLookRot = transformTr.rotation;
 
         Vector3 radialOffset = spindleRotation * radialLookRot * Vector3.forward;
-        result.translation = transform.translation + radialOffset * radius;
+        result.translation = transformTr.translation + radialOffset * radius;
 
         Quaternion pointerRotation = spindleRotation * radialLookRot * tilt;        
 
         result.rotation = pointerRotation;
 
-        // Vector3 virtualBrushNormal = pointerRotation * Vector3.forward;
-        // Vector3 tangent = spindleRotation * radialLookRot * Vector3.right;
-
-        // result.rotation = Quaternion.LookRotation(tangent, virtualBrushNormal);
-
-        result.scale = transform.scale;
+        result.scale = transformTr.scale;
 
         return result;
+      }
+
+      private TrTransform Trail() {
+
+        return LazyLerp(transformTr, goalTr, lerpT);
       }
 
       private float _lerpT;
@@ -77,8 +69,16 @@ namespace TiltBrush {
           return _lerpT;
         }
         set {
-          _lerpT = value;
+          if (value == 1)
+            _lerpT = value;
+          else
+          {
+            _lerpT = value % 1;
+            if (_lerpT < 0)
+              _lerpT += 1;
+          }
           Update();
+
         }
       }
       private float _radius;
@@ -99,111 +99,144 @@ namespace TiltBrush {
           case PathModeID.Orbit:
             result = Orbit(radius);
 
-            cubeTx.transform.position = result.translation;
-            cubeTx.transform.rotation = result.rotation;
-            cubeTx.transform.localScale = Vector3.one * result.scale;
+            result.ToTransform(markerTx);
 
-            
-            // cubeOutlineTx.transform.position = result.translation;
-            // cubeOutlineTx.transform.rotation = result.rotation;
-            // 
-            // float OutlineThickness = OutlineWidth + BaseThickness;
-            // float OutlineLength = OutlineWidth * Mathf.Min(1.0f, 1.0f / result.scale) + result.scale;
-            // cubeOutlineTx.transform.localScale = new Vector3(OutlineLength, OutlineThickness, OutlineThickness);
+            break;
+          case PathModeID.Trail:
+            result = Trail();
+
+            result.ToTransform(markerTx);
+
             break;
           default:
             break;
         }
       }
-
     }
 
-    private List<GuideCube> _guideCubes;
-    private void InitGuideCubes() {
-      if (_guideCubes != null)
+    private List<GuideMarker> _guideMarkers;
+    private void InitGuideMarkers() {
+      if (_guideMarkers != null)
         return;
 
-      _guideCubes = new List<GuideCube>();
+      _guideMarkers = new List<GuideMarker>();
 
-      for (int i = 0; i < m_GuideCubes.Count; i++) {
-        _guideCubes.Add(new GuideCube(m_GuideCubes[i])); // , m_GuideCubeOutlines[i]
+      for (int i = 0; i < m_GuideMarkers.Count; i++) {
+        _guideMarkers.Add(new GuideMarker(m_GuideMarkers[i]));
       }
     }
 
-    private void GuideCubesBegin() {
-      for (int i = 0; i < _guideCubes.Count; i++) {
-        _guideCubes[i].enabled = true;
+    private void BeginGuideMarkers(GuideMarker.PathModeID pathMode) {
+      for (int i = 0; i < _guideMarkers.Count; i++) {
+        _guideMarkers[i].enabled = true;
+        _guideMarkers[i].pathMode = pathMode;
       }
     }
 
-    private void GuideCubesEnd() {
-      for (int i = 0; i < _guideCubes.Count; i++) {
-        _guideCubes[i].enabled = false;
+    private void EndGuideMarkers() {
+      for (int i = 0; i < _guideMarkers.Count; i++) {
+        _guideMarkers[i].enabled = false;
       }
     }
 
-    private float _guideCubeOrbitalRadius;
-    private float GuideCubeOrbitalRadius {
+    private float _guideMarkerOrbitalRadius;
+    private float GuideMarkerOrbitalRadius {
       get {
-        return _guideCubeOrbitalRadius;
+        return _guideMarkerOrbitalRadius;
       }
       set {
-        if (_guideCubeOrbitalRadius != value) {
-          _guideCubeOrbitalRadius = value;
-          for (int i = 0; i < _guideCubes.Count; i++) {
-            _guideCubes[i].radius = _guideCubeOrbitalRadius;
+        if (_guideMarkerOrbitalRadius != value) {
+          _guideMarkerOrbitalRadius = value;
+          for (int i = 0; i < _guideMarkers.Count; i++) {
+            _guideMarkers[i].radius = _guideMarkerOrbitalRadius;
           }
         }
 
       }
     }
 
-    private TrTransform _guideCubeTransform;
-    private TrTransform GuideCubeTransform {
+    private TrTransform _guideMarkerTransform;
+    private TrTransform GuideMarkerTransform {
       get {
-        return _guideCubeTransform;
+        return _guideMarkerTransform;
       }
       set {
-        if (_guideCubeTransform != value) {
-          _guideCubeTransform = value;
-          for (int i = 0; i < _guideCubes.Count; i++) {
-            _guideCubes[i].transform = _guideCubeTransform;
+        if (_guideMarkerTransform != value) {
+          _guideMarkerTransform = value;
+          for (int i = 0; i < _guideMarkers.Count; i++) {
+            _guideMarkers[i].transformTr = _guideMarkerTransform;
           }
         }
 
       }
     }
 
-    private Quaternion _guideCubeTilt;
-    private Quaternion GuideCubeTilt {
+    private TrTransform _guideMarkerGoal;
+    private TrTransform GuideMarkerGoal {
       get {
-        return _guideCubeTilt;
+        return _guideMarkerGoal;
       }
       set {
-        if (_guideCubeTilt != value) {
-          _guideCubeTilt = value;
-          for (int i = 0; i < _guideCubes.Count; i++) {
-            _guideCubes[i].tilt = _guideCubeTilt;
+        if (_guideMarkerGoal != value) {
+          _guideMarkerGoal = value;
+          for (int i = 0; i < _guideMarkers.Count; i++) {
+            _guideMarkers[i].goalTr = _guideMarkerGoal;
           }
         }
 
       }
     }
 
-    private float _guideCubeLerpT;
-    private float GuideCubeLerpT {
+    private Quaternion _guideMarkerTilt;
+    private Quaternion GuideMarkerTilt {
       get {
-        return _guideCubeLerpT;
+        return _guideMarkerTilt;
       }
       set {
-        if (_guideCubeLerpT != value) {
-          _guideCubeLerpT = value;
-
-          float incr = 1f / _guideCubes.Count;
-
-          for (int i = 0; i < _guideCubes.Count; i++) {
-            _guideCubes[i].lerpT = (i * incr + _guideCubeLerpT) % 1f;
+        if (_guideMarkerTilt != value) {
+          _guideMarkerTilt = value;
+          for (int i = 0; i < _guideMarkers.Count; i++) {
+            _guideMarkers[i].tilt = _guideMarkerTilt;
           }
+        }
+
+      }
+    }
+
+    private float _guideMarkerLerpT;
+    private float GuideMarkerLerpT {
+      get {
+        return _guideMarkerLerpT;
+      }
+      set {
+        if (_guideMarkerLerpT != value) {
+          _guideMarkerLerpT = value;
+
+          switch (_guideMarkers[0].pathMode) {
+            case GuideMarker.PathModeID.Orbit: {
+                float incr = 1f / _guideMarkers.Count;
+
+                for (int i = 0; i < _guideMarkers.Count; i++) {
+                  _guideMarkers[i].lerpT = i * incr + _guideMarkerLerpT;
+                }
+
+              }
+              break;
+            case GuideMarker.PathModeID.Trail: {
+                // reserve last marker for 1.0 to show final position
+                float incr = 1f / (_guideMarkers.Count - 1);
+
+                for (int i = 0; i < _guideMarkers.Count - 1; i++) {
+                  _guideMarkers[i].lerpT = i * incr + _guideMarkerLerpT;
+                }
+                _guideMarkers[_guideMarkers.Count - 1].lerpT = 1;
+              }
+
+              break;
+            default:
+              break;
+          }
+
         }
 
       }
