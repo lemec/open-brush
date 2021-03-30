@@ -1,5 +1,6 @@
 ﻿#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace TiltBrush {
   public partial class FreePaintTool {
@@ -18,12 +19,16 @@ namespace TiltBrush {
       m_RevolverVelocity = 0;
 
       SetRevolverRadius(1);
+
+      GuideCubesBegin();
     }
 
     private void SetRevolverRadius(float lerpRate) {
       Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
       Vector3 brushDelta = m_btIntersectGoal - brushAttachTransform.position;
       m_RevolverRadius = Mathf.Lerp(m_RevolverRadius, brushDelta.magnitude, lerpRate);
+
+      GuideCubeOrbitalRadius = m_RevolverRadius;
     }
 
     private void ApplyRevolver(ref Vector3 pos, ref Quaternion rot) {
@@ -56,27 +61,31 @@ namespace TiltBrush {
       else {
         Transform brushAttachTransform = InputManager.m_Instance.GetBrushControllerAttachPoint();
 
-        Quaternion RevolverBrushRotation = brushAttachTransform.rotation * sm_OrientationAdjust;
+        Quaternion brushWorldRotation = brushAttachTransform.rotation * sm_OrientationAdjust;
 
-        m_RevolverBrushRotationOffset = radialLookRot.TrueInverse() * RevolverBrushRotation;
+        m_RevolverBrushRotationOffset = radialLookRot.TrueInverse() * brushWorldRotation;
+
+        GuideCubeTilt = m_RevolverBrushRotationOffset;
 
         if (m_RevolverVelocity == 0)
           m_RevolverAngle = 0;
       }
 
 
-
-      Quaternion deltaRot = Quaternion.AngleAxis(m_RevolverAngle, guideDelta.normalized);
+      Quaternion spindleRotation = Quaternion.AngleAxis(m_RevolverAngle, guideDelta.normalized);
 
       if (m_brushUndoButton)
         SetRevolverRadius(m_brushTrigger ? m_lazyInputRate : 1);
 
-      Vector3 revolverOffset = deltaRot * radialDelta.normalized * m_RevolverRadius;
-      Quaternion btCursorRotGoal = deltaRot * radialLookRot * m_RevolverBrushRotationOffset;
+      Vector3 revolverOffset = spindleRotation * radialDelta.normalized * m_RevolverRadius;
+      Quaternion btCursorRotGoal = spindleRotation * radialLookRot * m_RevolverBrushRotationOffset;
       m_btCursorRot = btCursorRotGoal;
 
-      pos = (m_brushTrigger && !m_lazyInput ? m_btCursorPos : m_btIntersectGoal) + revolverOffset;
+      pos = (m_brushTrigger && !m_LazyInputActive ? m_btCursorPos : m_btIntersectGoal) + revolverOffset;
       rot = m_btCursorRot;
+
+      GuideCubeTransform = TrTransform.TRS(m_btIntersectGoal, Quaternion.LookRotation(radialDelta.normalized, guideDelta), PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      GuideCubeLerpT = (GuideCubeLerpT + Time.deltaTime * 0.25f) % 1f;
     }
   }
 }
