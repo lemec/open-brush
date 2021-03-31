@@ -49,7 +49,7 @@ namespace TiltBrush {
       m_BimanualGuideIntersectRenderer.enabled = false;
       m_BimanualGuideIntersectOutlineRenderer.enabled = false;
 
-      InitGuideMarkers();
+      InitBrushGhosts();
       EndBimanualTape();
     }
 
@@ -72,7 +72,7 @@ namespace TiltBrush {
 
     private void EndBimanualTape() {
       m_BimanualTape = false;
-      EndGuideMarkers();
+      EndBrushGhosts();
 
       m_BimanualGuideLineDrawInTime = 0.0f;
       m_BimanualGuideLineT = 0.0f;

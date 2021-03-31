@@ -7398,7 +7398,7 @@ GameObject:
   - component: {fileID: 415778232}
   - component: {fileID: 415778231}
   m_Layer: 14
-  m_Name: GuideMarker D
+  m_Name: BrushGhost D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10955,7 +10955,7 @@ GameObject:
   - component: {fileID: 697818380}
   - component: {fileID: 697818379}
   m_Layer: 14
-  m_Name: GuideMarker B
+  m_Name: BrushGhost B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -12291,7 +12291,7 @@ MonoBehaviour:
   m_BimanualGuideLineBaseWidth: 0.025
   m_BimanualGuideHintIntensity: 0.75
   m_BimanualGuideDrawInDuration: 0.3
-  m_GuideMarkers:
+  m_brushGhosts:
   - {fileID: 1979422287}
   - {fileID: 697818378}
   - {fileID: 874159529}
@@ -12534,7 +12534,7 @@ GameObject:
   - component: {fileID: 874159531}
   - component: {fileID: 874159530}
   m_Layer: 14
-  m_Name: GuideMarker C
+  m_Name: BrushGhost C
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29871,7 +29871,7 @@ GameObject:
   - component: {fileID: 1883778815}
   - component: {fileID: 1883778814}
   m_Layer: 14
-  m_Name: GuideMarker E
+  m_Name: BrushGhost E
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31258,7 +31258,7 @@ GameObject:
   - component: {fileID: 1979422289}
   - component: {fileID: 1979422288}
   m_Layer: 14
-  m_Name: GuideMarker A
+  m_Name: BrushGhost A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

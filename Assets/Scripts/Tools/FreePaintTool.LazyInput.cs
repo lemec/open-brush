@@ -155,9 +155,9 @@ namespace TiltBrush {
       m_BimanualGuideLineRenderer.material.SetColor("_Color",
           SketchControlsScript.m_Instance.m_GrabHighlightActiveColor);
 
-      GuideMarkerTransform = TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
-      GuideMarkerGoal = TrTransform.TRS(brushAttachTransform.position, brushAttachTransform.rotation * sm_OrientationAdjust, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
-      GuideMarkerLerpT = (GuideMarkerLerpT + Time.deltaTime * 0.25f) % 1f;
+      BrushGhostTransform = TrTransform.TRS(m_btCursorPos, m_btCursorRot, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      BrushGhostGoal = TrTransform.TRS(brushAttachTransform.position, brushAttachTransform.rotation * sm_OrientationAdjust, PointerManager.m_Instance.MainPointer.BrushSizeAbsolute);
+      BrushGhostLerpT = (BrushGhostLerpT + Time.deltaTime * 0.25f) % 1f;
 
     }
 
@@ -173,7 +173,7 @@ namespace TiltBrush {
       m_BimanualGuideLineRenderer.enabled = true;
       m_BimanualGuideLineOutlineRenderer.enabled = true;
 
-      BeginGuideMarkers(GuideMarker.PathModeID.Trail);
+      BeginBrushGhosts(BrushGhost.PathModeID.Trail);
     }
 
     private void EndLazyInputVisuals() {
@@ -188,7 +188,7 @@ namespace TiltBrush {
       m_BimanualGuideLineRenderer.enabled = false;
       m_BimanualGuideLineOutlineRenderer.enabled = false;
 
-			EndGuideMarkers();
+			EndBrushGhosts();
     }
 
   }

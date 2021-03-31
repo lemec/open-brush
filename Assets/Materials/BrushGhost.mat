@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: GuideMarker
+  m_Name: BrushGhost
   m_Shader: {fileID: 4800000, guid: 9f2e62d534247cc4183f14aa0d7a810b, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
