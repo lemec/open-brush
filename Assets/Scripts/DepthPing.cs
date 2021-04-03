@@ -44,7 +44,7 @@ namespace TiltBrush {
         float diameter = Mathf.Lerp(0, m_pingDiameter, pingPhase);
         float scale = (1f / m_geometryScale) * diameter;
         m_shells[i].localScale = Vector3.one * scale;
-        // m_renderers[i].material.SetFloat("_HighlightThresholdMax", Mathf.Lerp(0, m_pingDiameter, pingPhase) + m_pingThickness);
+        m_renderers[i].material.SetFloat("_HighlightThresholdMax", Mathf.Lerp(0, m_pingDiameter, pingPhase) + m_pingThickness);
         m_renderers[i].material.SetColor("_Color", m_Color.Evaluate(pingPhase).FadeAlpha(Mathf.InverseLerp(m_pingDiameter, m_pingDiameter - m_pingThickness, diameter)));
       }
     }
