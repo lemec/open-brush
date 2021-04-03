@@ -1177,6 +1177,7 @@ namespace TiltBrush {
       //debug keys
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
       if (Config.IsExperimental) {
+
         var camTool = SketchSurfacePanel.m_Instance.ActiveTool as MultiCamTool;
 
         if (InputManager.m_Instance.GetKeyboardShortcutDown(InputManager.KeyboardShortcut.SaveNew)) {
@@ -1307,6 +1308,9 @@ namespace TiltBrush {
                   InputManager.m_Instance.GetKeyboardShortcutDown(
                     InputManager.KeyboardShortcut.ToggleProfile))) {
           IssueGlobalCommand(GlobalCommands.ToggleProfiling);
+        }
+        else {
+          VisorWidget.m_Instance.UpdateInput();
         }
       }
 #endif
