@@ -1,90 +1,75 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
 // Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
 
-//Highlights intersections with other objects
- // https://chrismflynn.wordpress.com/2012/09/06/fun-with-shaders-and-the-depth-buffer/
 Shader "Custom/ShellShader"
 {
-	Properties
+Properties
+{
+	_Color ("Color", Color) = (0,0,0,0)
+}
+
+SubShader
+{
+	Blend OneMinusDstColor OneMinusSrcAlpha
+	ZWrite Off
+	Cull Off
+
+	Tags
 	{
-		_Color("Main Color", Color) = (1, 1, 1, .5) //Color when not intersecting
-		_HighlightThresholdMax("Highlight Threshold Max", Float) = 1 //Max difference for intersections
-		_HighlightPower("Highlight Power", Float) = 1
+		"RenderType"="Transparent"
+		"Queue"="Transparent"
 	}
-	SubShader
+
+	Pass
 	{
-		Tags {
-			"Queue" = "Transparent"
-			"RenderType"="Transparent"  
-		}
- 
-		Pass
+		CGPROGRAM
+		#pragma target 3.0
+		#pragma vertex vert
+		#pragma fragment frag
+
+		#include "UnityCG.cginc"
+
+		struct appdata
 		{
+			float4 vertex : POSITION;
+		};
 
-		// Result = FG * BF + BG * BF
-			Blend OneMinusDstColor OneMinusSrcAlpha
+		struct v2f
+		{
+			float2 screenuv : TEXCOORD0;
+			float4 vertex : SV_POSITION;
+			float depth : DEPTH;
+		};
 
-			ZWrite Off
-			Cull Off
- 
-			CGPROGRAM
-			#pragma target 2.0
-			#pragma vertex vert
-			#pragma fragment frag
-			#include "UnityCG.cginc"
- 
-			uniform sampler2D _CameraDepthTexture; //Depth Texture
-			uniform float4 _Color;
-			uniform float _HighlightThresholdMax;
-			uniform float _HighlightPower;
+		sampler2D _MainTex;
 
-			struct v2f
-			{
-				float4 pos : SV_POSITION;
-				float4 projPos : TEXCOORD1; //Screen position of pos
-			};
- 
-			v2f vert(appdata_base v)
-			{
-				v2f o;
-				o.pos = UnityObjectToClipPos(v.vertex);
-				o.projPos = ComputeScreenPos(o.pos);
- 
-				return o;
-			}
- 
-			half4 frag(v2f i) : COLOR
-			{
-				float4 finalColor = float4(0, 0, 0, 0);
+		v2f vert (appdata v)
+		{
+			v2f o;
+			o.vertex = UnityObjectToClipPos(v.vertex);
 
-				//Get the distance to the camera from the depth buffer for this point
-				float sceneZ = LinearEyeDepth (tex2Dproj(_CameraDepthTexture,
-															UNITY_PROJ_COORD(i.projPos)).r);
- 
-				//Actual distance to the camera
-				float partZ = i.projPos.z;
- 
-				//If the two are similar, then there is an object intersecting with our object
-				float diff = (abs(sceneZ - partZ)) /
-					_HighlightThresholdMax;
- 
-				if(diff <= 1)
-				{
-					float colorLerp = pow(diff, _HighlightPower);
-					finalColor = lerp(_Color, finalColor, (colorLerp - 0.1) * 1.5) + (colorLerp > 0.9 && colorLerp < 0.95);
-					finalColor.a = colorLerp * _Color.a;
-				}
- 
-				half4 c;
-				c.r = finalColor.r * finalColor.a;//finalColor.r;
-				c.g = finalColor.g * finalColor.a;//finalColor.g;
-				c.b = finalColor.b * finalColor.a;//finalColor.b;
-				c.a = finalColor.a;
- 
-				return c;
-			}
- 
-			ENDCG
+			o.screenuv = ((o.vertex.xy / o.vertex.w) + 1)/2;
+			o.screenuv.y = 1 - o.screenuv.y;
+			o.depth = -mul(UNITY_MATRIX_MV, v.vertex).z *_ProjectionParams.w;
+
+			return o;
 		}
+		
+		sampler2D _CameraDepthNormalsTexture;
+		fixed4 _Color;
+
+		fixed4 frag (v2f i) : SV_Target
+		{
+			float screenDepth = DecodeFloatRG(tex2D(_CameraDepthNormalsTexture, i.screenuv).zw);
+			float diff = abs(screenDepth - i.depth);
+			float intersect = 1 - smoothstep(0, _ProjectionParams.w * 0.5, diff);
+
+			fixed4 glowColor = fixed4(lerp(pow(_Color.rgb, 4), _Color.rgb, pow(intersect, 4)), 1);
+			
+			fixed4 col = glowColor * intersect * _Color.a;
+			return col;
+		}
+		ENDCG
 	}
-    FallBack "VertexLit"
+  }
 }
