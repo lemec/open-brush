@@ -62,7 +62,7 @@ namespace TiltBrush {
     void Update() {
       FollowBrushController();
     }
+#endif
   }
 
-#endif
 }
