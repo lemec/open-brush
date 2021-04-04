@@ -2,13 +2,14 @@
 
 //Highlights intersections with other objects
  // https://chrismflynn.wordpress.com/2012/09/06/fun-with-shaders-and-the-depth-buffer/
-Shader "Custom/ShellShader"
+Shader "Custom/DepthRipple"
 {
 	Properties
 	{
 		_Color("Main Color", Color) = (1, 1, 1, .5) //Color when not intersecting
-		_HighlightThresholdMax("Highlight Threshold Max", Float) = 1 //Max difference for intersections
-		_HighlightPower("Highlight Power", Float) = 1
+		_MaxDistance("Max Distance", Float) = 10
+		_Spacing("Spacing", Float) = 1
+		_Threshold("Threshold", Float) = 0.8
 	}
 	SubShader
 	{
@@ -27,20 +28,22 @@ Shader "Custom/ShellShader"
 			Cull Off
  
 			CGPROGRAM
-			#pragma target 2.0
+			#pragma target 3.0
 			#pragma vertex vert
 			#pragma fragment frag
 			#include "UnityCG.cginc"
  
-			uniform sampler2D _CameraDepthTexture; //Depth Texture
-			uniform float4 _Color;
-			uniform float _HighlightThresholdMax;
-			uniform float _HighlightPower;
+			sampler2D _CameraDepthTexture; //Depth Texture
+			float4 _Color;
+			float _MaxDistance;
+			float _Spacing;
+			float _Threshold;
 
 			struct v2f
 			{
 				float4 pos : SV_POSITION;
-				float4 projPos : TEXCOORD1; //Screen position of pos
+				float4 projPos : TEXCOORD0; //Screen position of pos
+				float4 viewPos : TEXCOORD1;
 			};
  
 			v2f vert(appdata_base v)
@@ -48,7 +51,7 @@ Shader "Custom/ShellShader"
 				v2f o;
 				o.pos = UnityObjectToClipPos(v.vertex);
 				o.projPos = ComputeScreenPos(o.pos);
- 
+				o.viewPos = v.vertex;
 				return o;
 			}
  
@@ -56,24 +59,15 @@ Shader "Custom/ShellShader"
 			{
 				float4 finalColor = float4(0, 0, 0, 0);
 
+				float viewDot = -normalize(ObjSpaceViewDir(i.viewPos)).z;
 				//Get the distance to the camera from the depth buffer for this point
-				float sceneZ = LinearEyeDepth (tex2Dproj(_CameraDepthTexture,
-															UNITY_PROJ_COORD(i.projPos)).r);
- 
-				//Actual distance to the camera
-				float partZ = i.projPos.z;
- 
+				float pixelDistance = LinearEyeDepth(tex2Dproj(_CameraDepthTexture, UNITY_PROJ_COORD(i.projPos)).r) / viewDot;
 				//If the two are similar, then there is an object intersecting with our object
-				float diff = (abs(sceneZ - partZ)) /
-					_HighlightThresholdMax;
- 
-				if(diff <= 1)
-				{
-					float colorLerp = pow(diff, _HighlightPower);
-					finalColor = lerp(_Color, finalColor, (colorLerp - 0.1) * 1.5) + (colorLerp > 0.9 && colorLerp < 0.95);
-					finalColor.a = colorLerp * _Color.a;
-				}
- 
+				float diff = frac(pixelDistance / _Spacing);
+				diff = step(_Threshold, (0.5 - min(diff, 1 - diff)) * 2);
+				diff = lerp(diff, 0, saturate(pixelDistance / _MaxDistance));
+				finalColor = diff * _Color;
+
 				half4 c;
 				c.r = finalColor.r * finalColor.a;//finalColor.r;
 				c.g = finalColor.g * finalColor.a;//finalColor.g;

@@ -16,7 +16,7 @@ namespace TiltBrush {
     }
 
     [SerializeField]
-    protected GameObject m_pingGO;
+    protected GameObject m_depthRipple;
 
     protected bool m_showVisuals;
 
@@ -112,8 +112,8 @@ namespace TiltBrush {
 
     private void ToggleVisuals() {
       m_showVisuals = !m_showVisuals;
-      Debug.Log(m_showVisuals);
-      m_pingGO.SetActive(m_showVisuals);
+
+      m_depthRipple.SetActive(m_showVisuals);
     }
 
     private void SetDesiredState(State desiredState) {
