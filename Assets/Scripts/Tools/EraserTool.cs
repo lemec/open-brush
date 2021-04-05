@@ -47,6 +47,7 @@ public class EraserTool : StrokeModificationTool {
       m_SpinSpeed = Mathf.Max(m_SpinSpeed - m_SpinSpeedDecay * Time.deltaTime, 0.0f);
       m_SpinSpeedVel = 0.0f;
 
+        // TODO: Can we find a better place for this? Ah crap mom is gonna get mad dinner is getting cold!
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
         m_BatchFilter = null;
 #endif

@@ -2,7 +2,7 @@
 
 //Highlights intersections with other objects
  // https://chrismflynn.wordpress.com/2012/09/06/fun-with-shaders-and-the-depth-buffer/
-Shader "Custom/DepthFog"
+Shader "Moat/DepthFog"
 {
 	Properties
 	{
@@ -24,7 +24,7 @@ Shader "Custom/DepthFog"
 			Blend OneMinusDstColor OneMinusSrcAlpha
 
 			ZWrite Off
-			Cull Off
+			Cull Back
  
 			CGPROGRAM
 			#pragma target 3.0
@@ -42,6 +42,7 @@ Shader "Custom/DepthFog"
 			float4 _Color;
 			float _MaxDistance;
 			float _Radius;
+			// float4x4 _SceneMatrix;
 
 			struct v2f
 			{
@@ -61,6 +62,7 @@ Shader "Custom/DepthFog"
 				o.objPos = v.vertex;
 				o.normal = UnityObjectToWorldNormal(v.normal);
 				o.viewDir = normalize(UnityWorldSpaceViewDir(mul(unity_ObjectToWorld, v.vertex)));
+
 				return o;
 			}
  

@@ -93,7 +93,8 @@ public class BaseStrokeIntersectionTool : BaseTool {
     }
 
 
-    public Batch m_BatchFilter;
+    [System.NonSerialized]
+    protected Batch m_BatchFilter;
 #endif
 
     virtual protected void SnapIntersectionObjectToController() { }
