@@ -20,8 +20,9 @@ Shader "Moat/GridLens"
 		{
 
 		    // Result = FG * BF + BG * BF
-			Blend OneMinusDstColor OneMinusSrcColor
-			
+			// Blend OneMinusDstColor OneMinusSrcColor
+			Blend OneMinusDstColor OneMinusSrcAlpha
+
 			Lighting Off
 			ZWrite Off
 			Cull Back
@@ -102,17 +103,21 @@ Shader "Moat/GridLens"
 
 
 				float threshold = 0.975;
-				float3 rayHitColor = smoothstep(threshold, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision), smoothstep(0.5, 0, rayHitPosToAxisDivision)));
+				float3 rayHitColor = 0.5 * smoothstep(threshold, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision), smoothstep(0.5, 0, rayHitPosToAxisDivision)));
 
 				float threshold2 = 0.975;
-				rayHitColor += smoothstep(threshold2, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision2), smoothstep(0.5, 0, rayHitPosToAxisDivision2)));
+				rayHitColor += 0.5 * smoothstep(threshold2, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision2), smoothstep(0.5, 0, rayHitPosToAxisDivision2)));
 
 
 				float fade                = smoothstep(_MaxDistance + _Radius * 0.5, _MaxDistance - _Radius * 0.5, rayDist);
-				float4 ColorA = float4(rayHitColor, smoothstep(threshold, 1, max(rayHitColor.r, max(rayHitColor.g, rayHitColor.b))));
-				// float4 ColorA             = float4(_Color.r, _Color.g, _Color.b, 0);
-				// float4 ColorB             = float4(1 - _Color.b, 1 - _Color.r, 1 - _Color.g, _Color.a);
-				float4 finalColor         = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorA, 0, pow(fade, 3))) + rim;
+				float4 ColorC = float4(rayHitColor, smoothstep(threshold, 1, max(rayHitColor.r, max(rayHitColor.g, rayHitColor.b))));
+				float4 ColorA             = float4(_Color.r, _Color.g, _Color.b, 0);
+				float4 ColorB             = float4(1 - _Color.b, 1 - _Color.r, 1 - _Color.g, _Color.a * 0.333);
+
+				float4 fogColor = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorB, ColorA, pow(fade, 3)));
+
+				float4 finalColor         = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorC, 0, pow(fade, 3))) + rim + fogColor;
+				
 
 				// premultiply color
 				half4 c;

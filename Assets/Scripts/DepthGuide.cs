@@ -6,7 +6,10 @@ namespace TiltBrush {
   public class DepthGuide : MonoBehaviour {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
 
-    public Transform m_MainCanvas;
+    [SerializeField]
+    protected Transform m_MainCanvas;
+    [SerializeField]
+    protected Transform m_Gimbal;
     [SerializeField]
     protected Renderer m_meshRenderer;
 
@@ -60,6 +63,7 @@ namespace TiltBrush {
       m_lerpRadius = Mathf.Lerp(m_lerpRadius, headLerpTarget, Time.deltaTime * 5);
       transform.localScale = Vector3.one * Mathf.Lerp(0, 0.1f * m_MaxRadius, m_lerpRadius);
       transform.position = InputManager.m_Instance.GetBrushControllerAttachPoint().position;
+      m_Gimbal.rotation = m_MainCanvas.rotation;
 
       m_meshRenderer.material.SetFloat("_MaxDistance", headDist);
       m_meshRenderer.material.SetFloat("_Radius", m_lerpRadius * m_MaxRadius);
