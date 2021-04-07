@@ -315,7 +315,21 @@ public class SteamControllerInfo : ControllerInfo {
     return (!last && current);
   }
 
-  public override void TriggerControllerHaptics(float seconds) {
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    /// Returns true if the specified input has just been deactivated (falling-edge trigger).
+    public override bool GetVrInputUp(VrInput input) {
+      if (Config.IsExperimental) {
+        if (!IndexIsValid()) { return false; }
+        bool last = GetVrInputForFrame(input, currentFrame: false);
+        bool current = GetVrInputForFrame(input, currentFrame: true);
+        return (last && !current);
+      }
+      else
+        return false;
+    }
+#endif
+
+    public override void TriggerControllerHaptics(float seconds) {
     if (!IndexIsValid()) { return; }
     SteamVR_Input_ActionSet_TiltBrush tb = SteamVR_Actions.TiltBrush;
     SteamVR_Input_Sources index = TrackedPose.inputSource;

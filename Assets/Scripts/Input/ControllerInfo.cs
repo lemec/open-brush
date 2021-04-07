@@ -211,14 +211,57 @@ public abstract class ControllerInfo {
     return false;
   }
 
-  // -------------------------------------------------------------------------------------------- //
-  // Command/Input Held support
-  // -------------------------------------------------------------------------------------------- //
-  // Useful in scenarios where a button should be held for a timeout period, e.g. when sharing
-  // videos or trashing gifs.
 
-  /// Helper function to translate commands to VR Inputs.
-  public VrInput? GetCommandHoldInput(SketchCommands rCommand) {
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    /// Returns true if the current command *just* became active (rising-edge trigger).
+    public bool GetCommandUp(SketchCommands rCommand) {
+      if (App.Config.m_IsExperimental) {
+        switch (rCommand) {
+          case SketchCommands.AltActivate:
+          case SketchCommands.Activate:
+            return IsTriggerUp();
+          case SketchCommands.RewindTimeline:
+            return GetVrInputUp(VrInput.Button06 /*quad_down*/);
+          case SketchCommands.AdvanceTimeline:
+            return GetVrInputUp(VrInput.Button05 /*quad_up*/);
+          case SketchCommands.TimelineHome:
+            return IsTrigger() && GetVrInputUp(VrInput.Button06 /*quad_down*/);
+          case SketchCommands.TimelineEnd:
+            return IsTrigger() && GetVrInputUp(VrInput.Button05 /*quad_up*/);
+          case SketchCommands.Reset:
+            return GetVrInputUp(VrInput.Button05 /*quad_up*/);
+          case SketchCommands.Undo:
+            return GetVrInputUp(VrInput.Button01 /*half_left*/);
+          case SketchCommands.Redo:
+            return GetVrInputUp(VrInput.Button02 /*half_right*/);
+          case SketchCommands.Teleport:
+            return IsTriggerUp();
+          case SketchCommands.ToggleDefaultTool:
+            return GetVrInputUp(VrInput.Button03 /*app button*/);
+          case SketchCommands.MenuContextClick:
+            return GetVrInputUp(VrInput.Button04 /*full-pad-button*/);
+          case SketchCommands.WorldTransformReset:
+            return GetVrInputUp(VrInput.Button04 /*full-pad-button*/);
+          case SketchCommands.PinWidget:
+            return IsTriggerUp();
+          case SketchCommands.DuplicateSelection:
+            return GetVrInputUp(VrInput.Button04);
+          case SketchCommands.ToggleSelection:
+            return GetVrInputUp(VrInput.Button04);
+        }
+      }
+      return false;
+    }
+#endif
+
+    // -------------------------------------------------------------------------------------------- //
+    // Command/Input Held support
+    // -------------------------------------------------------------------------------------------- //
+    // Useful in scenarios where a button should be held for a timeout period, e.g. when sharing
+    // videos or trashing gifs.
+
+    /// Helper function to translate commands to VR Inputs.
+    public VrInput? GetCommandHoldInput(SketchCommands rCommand) {
     switch (rCommand) {
     case SketchCommands.Confirm:
       return VrInput.Button01 /*half_left*/;
@@ -297,8 +340,20 @@ public abstract class ControllerInfo {
     return GetVrInputDown(VrInput.Trigger);
   }
 
-  /// Returns the same value as GetVrInputTouch(VrControllerInput.Touchpad)
-  public bool GetPadTouch() {
+    /// Returns the same value as GetVrInputDown(VrControllerInput.Trigger)
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    public bool IsTriggerUp() {
+      if (Config.IsExperimental) {
+
+        return GetVrInputUp(VrInput.Trigger);
+      }
+      else
+        return false;
+   }
+#endif
+
+    /// Returns the same value as GetVrInputTouch(VrControllerInput.Touchpad)
+    public bool GetPadTouch() {
     return GetVrInputTouch(VrInput.Touchpad);
   }
 
@@ -354,21 +409,26 @@ public abstract class ControllerInfo {
   /// Returns true if the specified input has just been activated (rising-edge trigger).
   public abstract bool GetVrInputDown(VrInput input);
 
-  /// Returns true if the specified input is currently being touched, and if the controller
-  /// supports it (currently: Oculus Touch, Knuckles).
-  ///
-  /// Because of hardware limitations, on supported controllers it is possible for this
-  /// to return false when GetVrInput() returns true.
-  ///
-  /// Some implementations may not support touch but will synthesize a value based on
-  /// whether GetVrInput() returns true. For these implementations you _are_ guaranteed
-  /// that GetVrInput implies GetVrInputTouch.
-  ///
-  /// TODO: this function is hard to describe right now. We should clarify constraints. eg:
-  /// - Implementations must return false if touch is not supported
-  /// - or, implementations must return true if GetVrInput() returns true (despite capacitative
-  ///   lag etc)
-  public abstract bool GetVrInputTouch(VrInput input);
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    /// Returns true if the specified input has just been deactivated (falling-edge trigger).
+    public abstract bool GetVrInputUp(VrInput input);
+#endif
+
+    /// Returns true if the specified input is currently being touched, and if the controller
+    /// supports it (currently: Oculus Touch, Knuckles).
+    ///
+    /// Because of hardware limitations, on supported controllers it is possible for this
+    /// to return false when GetVrInput() returns true.
+    ///
+    /// Some implementations may not support touch but will synthesize a value based on
+    /// whether GetVrInput() returns true. For these implementations you _are_ guaranteed
+    /// that GetVrInput implies GetVrInputTouch.
+    ///
+    /// TODO: this function is hard to describe right now. We should clarify constraints. eg:
+    /// - Implementations must return false if touch is not supported
+    /// - or, implementations must return true if GetVrInput() returns true (despite capacitative
+    ///   lag etc)
+    public abstract bool GetVrInputTouch(VrInput input);
 
   /// Trigger a haptic pulse for the given duration.
   public abstract void TriggerControllerHaptics(float seconds);

@@ -37,6 +37,16 @@ namespace TiltBrush {
 
     public bool m_brushUndoButton { get; private set; }
     public bool m_brushUndoButtonDown { get; private set; }
+
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    public bool m_brushUndoButtonUp { get; private set; }
+    public bool m_brushUndoButtonTapped { get; private set; }
+    private bool m_brushUndoButtonTapInvalid { get; set; }
+    private float m_brushUndoButtonTapExpiry { get; set; }
+    private const float TapDelayTime = 0.333f;
+    public bool m_brushUndoButtonHeld { get; private set; }
+#endif
+
     public float m_brushTriggerRatio { get; private set; }
     public float m_wandTriggerRatio { get; private set; }
 
@@ -89,6 +99,25 @@ namespace TiltBrush {
       m_brushUndoButton     = InputManager.Brush.GetCommand(InputManager.SketchCommands.Undo);
       m_brushUndoButtonDown = InputManager.Brush.GetCommandDown(InputManager.SketchCommands.Undo);
 
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      if (Config.IsExperimental) {
+        m_brushUndoButtonUp   = InputManager.Brush.GetCommandUp(InputManager.SketchCommands.Undo);
+        m_brushUndoButtonTapped     = m_brushUndoButtonUp && !m_brushUndoButtonTapInvalid;
+				if (m_brushUndoButtonDown) {
+          m_brushUndoButtonTapInvalid   = false;
+          m_brushUndoButtonTapExpiry    = TapDelayTime;
+        }
+
+        if (!m_brushUndoButtonTapInvalid) {
+          m_brushUndoButtonTapExpiry    = Mathf.MoveTowards(m_brushUndoButtonTapExpiry, 0, Time.deltaTime);
+          if (m_brushTriggerDown || m_brushUndoButtonTapExpiry <= 0)
+            m_brushUndoButtonTapInvalid = true;
+        }
+
+        m_brushUndoButtonHeld = m_brushUndoButtonTapInvalid && m_brushUndoButton;
+      }
+#endif
+
       if (m_EatInput && !m_brushTrigger)
         m_EatInput = false;
 
@@ -105,6 +134,13 @@ namespace TiltBrush {
 
         m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_LazyInputActive && m_BimanualTape && m_wandTrigger));
 
+        bool depthGuideVisible = DepthGuide.m_instance && DepthGuide.m_instance.isActiveAndEnabled;
+        if (!(m_BimanualTape && m_RevolverActive)) {
+          m_GridSnapActive = depthGuideVisible && m_brushUndoButtonHeld;
+        }
+        else if (m_GridSnapActive && !depthGuideVisible)
+          m_GridSnapActive = false;
+
         if (m_BimanualTape) {
           if (!m_wandTrigger && !m_brushTrigger)
             EndBimanualTape();
@@ -112,13 +148,14 @@ namespace TiltBrush {
             UpdateBimanualGuideLineT();
             UpdateBimanualGuideVisuals();
 
-            UpdateBimanualIntersectVisuals();
+            if (m_bimanualControlPointerPosition)
+              UpdateBimanualIntersectVisuals();
 
-            if (m_brushUndoButtonDown)
+            if (m_brushUndoButtonTapped)
               BeginRevolver();
           }
         }
-        else if (m_brushUndoButtonDown) {
+        else if (m_brushUndoButtonTapped) {
           if (m_brushTrigger) {
             if (m_LazyInputActive)
               m_LazyInputTangentMode = !m_LazyInputTangentMode;

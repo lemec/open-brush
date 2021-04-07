@@ -73,7 +73,11 @@ namespace TiltBrush {
     }
 
     void ApplyLazyInput(ref Vector3 pos, ref Quaternion rot) {
-      if (!m_PaintingActive || !m_LazyInputActive) {
+      if (!m_PaintingActive || !m_LazyInputActive || m_GridSnapActive) {
+
+        if (m_GridSnapActive)
+          ApplyGridSnap(ref pos, ref rot);
+
         m_btCursorPos = pos;
         m_btCursorRot = rot;
         m_lazyInputRate = 0;

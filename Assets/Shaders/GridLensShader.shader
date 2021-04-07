@@ -44,6 +44,8 @@ Shader "Moat/GridLens"
 			float _MaxDistance;
 			float _Radius;
 			float _GridScale;
+			float3 _WorldSpaceCursorPos;
+
 			float4x4 _SceneMatrix;
 			float4x4 _InverseSceneMatrix;
 
@@ -70,7 +72,9 @@ Shader "Moat/GridLens"
 				return o;
 			}
 
-			float3 WorldToLocalPos(float4x4 Matrix, float3 Point)
+			// note that positional offset (matrix[0].w, matrix[1].w, matrix[2].w) has been REVERSE and is subtracting
+			// don't ask me why I had to do this, but it had to be done to make it work in this scenario.
+			float3 WorldToCanvasPos(float4x4 Matrix, float3 Point)
 			{
 				float3 res;
 				res.x = Matrix[0].x * Point.x + Matrix[0].y * Point.y + Matrix[0].z * Point.z - Matrix[0].w;
@@ -90,33 +94,37 @@ Shader "Moat/GridLens"
 
 				// position of the ray hit in unity world coordinates, that are then scrunched to fit the scenematrix
 				float3 rayHitPos = float4(rayDist * viewDir - _WorldSpaceCameraPos, 1);
-				float3 rayHitScenePos = WorldToLocalPos(_SceneMatrix, rayHitPos);
+				float3 rayHitCanvasPos = WorldToCanvasPos(_SceneMatrix, rayHitPos);
 
-				//If the two are similar, then there is an object intersecting with our object
+				// If the two are similar, then there is an object intersecting with our object
 				float rim                 = saturate(1 - abs(dot(i.normal, viewDir)) * 2);
 
+				// Adaptive grid major lines
 				float gridSubdivision = pow(2, floor(log2(_GridScale * 2)));
-				float3 rayHitPosToAxisDivision = abs((rayHitScenePos * gridSubdivision) % 1);
+				float3 rayHitPosToAxisDivision = abs((rayHitCanvasPos * gridSubdivision) % 1);
 
+				// Adaptive grid subdivisions
 				float gridSubdivision2 = pow(2, floor(log2(_GridScale * 4)));
-				float3 rayHitPosToAxisDivision2 = abs((rayHitScenePos * gridSubdivision2) % 1);
+				float3 rayHitPosToAxisDivision2 = abs((rayHitCanvasPos * gridSubdivision2) % 1);
 
 
 				float threshold = 0.975;
 				float3 rayHitColor = 0.5 * smoothstep(threshold, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision), smoothstep(0.5, 0, rayHitPosToAxisDivision)));
 
-				float threshold2 = 0.975;
-				rayHitColor += 0.5 * smoothstep(threshold2, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision2), smoothstep(0.5, 0, rayHitPosToAxisDivision2)));
+				rayHitColor += 0.5 * smoothstep(threshold, 1, max(smoothstep(0.5, 1, rayHitPosToAxisDivision2), smoothstep(0.5, 0, rayHitPosToAxisDivision2)));
 
+
+				// cursor position indicator
+				float cursorFacing = smoothstep(0.999995, 1, dot(viewDir, normalize(_WorldSpaceCameraPos - _WorldSpaceCursorPos)));
 
 				float fade                = smoothstep(_MaxDistance + _Radius * 0.5, _MaxDistance - _Radius * 0.5, rayDist);
 				float4 ColorC = float4(rayHitColor, smoothstep(threshold, 1, max(rayHitColor.r, max(rayHitColor.g, rayHitColor.b))));
 				float4 ColorA             = float4(_Color.r, _Color.g, _Color.b, 0);
-				float4 ColorB             = float4(1 - _Color.b, 1 - _Color.r, 1 - _Color.g, _Color.a * 0.333);
+				float4 ColorB             = float4(1 - _Color.b, 1 - _Color.r, 1 - _Color.g, _Color.a * 0.5);
 
 				float4 fogColor = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorB, ColorA, pow(fade, 3)));
 
-				float4 finalColor         = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorC, 0, pow(fade, 3))) + rim + fogColor;
+				float4 finalColor         = (rayDist > _MaxDistance + _Radius ? 0 : lerp(ColorC, 0, pow(fade, 3))) + rim + fogColor + cursorFacing;
 				
 
 				// premultiply color

@@ -150,8 +150,36 @@ public class GvrControllerInfo : ControllerInfo {
       return GetTriggerButtonDown() || GetAppButtonDown() || GetClickButtonDown();
     }
     return false;
-  }
+    }
 
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    public override bool GetVrInputUp(VrInput input) {
+      if (Config.IsExperimental) {
+        switch (input) {
+          case VrInput.Button03:
+            return GetAppButtonUp();
+          case VrInput.Button01: /*half_left*/
+          case VrInput.Button02: /*half_right*/
+          case VrInput.Button05: /*quad_up*/
+          case VrInput.Button06: /*quad_down*/
+            return GetClickButtonUp() && IsInPosition(GetTouchPos(), input);
+
+          case VrInput.Button04: /*full-pad button*/
+            return GetClickButtonUp();
+
+          case VrInput.Trigger:
+            return GetTriggerButtonUp();
+
+          case VrInput.Any:
+            return GetTriggerButtonUp() || GetAppButtonUp() || GetClickButtonUp();
+        }
+        return false;
+      }
+      else
+        return false;
+    }
+
+#endif
   public override bool GetVrInputTouch(VrInput input) {
     switch (input) {
     case VrInput.Button01: /*half_left*/
@@ -192,7 +220,19 @@ public class GvrControllerInfo : ControllerInfo {
                         : GvrControllerInput.TriggerButtonDownRight;
   }
 
-  private bool GetIsTouching() {
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    private bool GetTriggerButtonUp() {
+      if (Config.IsExperimental) {
+        if (GetControllerGrip()) { return false; }
+        return m_isLeftHand ? GvrControllerInput.TriggerButtonUpLeft
+                            : GvrControllerInput.TriggerButtonUpRight;
+      }
+      else
+        return false;
+    }
+#endif
+
+    private bool GetIsTouching() {
     return m_isLeftHand ? GvrControllerInput.IsTouchingLeft
                         : GvrControllerInput.IsTouchingRight;
   }
@@ -220,7 +260,19 @@ public class GvrControllerInfo : ControllerInfo {
                         : GvrControllerInput.ClickButtonDownRight;
   }
 
-  private bool GetAppButton() {
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    private bool GetClickButtonUp() {
+      if (Config.IsExperimental) {
+        if (GetControllerGrip()) { return false; }
+        return m_isLeftHand ? GvrControllerInput.ClickButtonUpLeft
+                          : GvrControllerInput.ClickButtonUpRight;
+      }
+      return false;
+    }
+
+#endif
+
+      private bool GetAppButton() {
     return m_isLeftHand ? GvrControllerInput.AppButtonLeft
                         : GvrControllerInput.AppButtonRight;
   }
@@ -229,5 +281,18 @@ public class GvrControllerInfo : ControllerInfo {
     return m_isLeftHand ? GvrControllerInput.AppButtonDownLeft
                         : GvrControllerInput.AppButtonDownRight;
   }
-}
+
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    private bool GetAppButtonUp() {
+      if (Config.IsExperimental) {
+        return m_isLeftHand ? GvrControllerInput.AppButtonUpLeft
+                            : GvrControllerInput.AppButtonUpRight;
+      }
+      else
+        return false;
+    }
+
+#endif
+
+  }
 } // namespace TiltBrush

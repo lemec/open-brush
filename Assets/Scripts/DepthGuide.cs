@@ -7,7 +7,7 @@ namespace TiltBrush {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
 
     [SerializeField]
-    protected Transform m_MainCanvas;
+    public Transform m_MainCanvas;
     [SerializeField]
     protected Transform m_Gimbal;
     [SerializeField]
@@ -17,9 +17,10 @@ namespace TiltBrush {
     protected float m_MaxRadius = 2;
     protected float m_lerpRadius;
 
-    // Start is called before the first frame update
-    void Start() {
+    public static DepthGuide m_instance { get; private set; }
 
+    void Awake() {
+      m_instance = this;
     }
 
     private void OnEnable() {
@@ -69,6 +70,9 @@ namespace TiltBrush {
       m_meshRenderer.material.SetFloat("_Radius", m_lerpRadius * m_MaxRadius);
       m_meshRenderer.material.SetMatrix("_SceneMatrix", m_MainCanvas.worldToLocalMatrix);
       m_meshRenderer.material.SetFloat("_GridScale", m_MainCanvas.lossyScale.x);
+
+
+      m_meshRenderer.material.SetVector("_WorldSpaceCursorPos", InputManager.m_Instance.GetBrushControllerAttachPoint().position);
     }
 
     // LateUpdate is called just before rendering
