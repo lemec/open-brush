@@ -1309,7 +1309,7 @@ namespace TiltBrush {
                     InputManager.KeyboardShortcut.ToggleProfile))) {
           IssueGlobalCommand(GlobalCommands.ToggleProfiling);
         }
-        else {
+        else if (VisorWidget.m_Instance) {
           VisorWidget.m_Instance.UpdateInput();
         }
       }
