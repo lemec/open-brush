@@ -195,6 +195,9 @@ public abstract class ControllerInfo {
       return GetVrInputDown(VrInput.Button02 /*half_right*/);
     case SketchCommands.Teleport:
       return IsTriggerDown();
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    case SketchCommands.ShowPinCushion:
+#endif
     case SketchCommands.ToggleDefaultTool:
       return GetVrInputDown(VrInput.Button03 /*app button*/);
     case SketchCommands.MenuContextClick:
@@ -236,6 +239,9 @@ public abstract class ControllerInfo {
             return GetVrInputUp(VrInput.Button02 /*half_right*/);
           case SketchCommands.Teleport:
             return IsTriggerUp();
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+          case SketchCommands.ShowPinCushion:
+#endif
           case SketchCommands.ToggleDefaultTool:
             return GetVrInputUp(VrInput.Button03 /*app button*/);
           case SketchCommands.MenuContextClick:

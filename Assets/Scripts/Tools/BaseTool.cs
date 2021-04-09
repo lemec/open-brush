@@ -44,6 +44,9 @@ public class BaseTool : MonoBehaviour {
     EmptyTool,
     CameraPathTool,
     FlyTool,
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+      DraftingTool,
+#endif
   }
   public ToolType m_Type;
 

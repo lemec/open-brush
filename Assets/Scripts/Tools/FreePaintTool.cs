@@ -129,7 +129,7 @@ namespace TiltBrush {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
       if (Config.IsExperimental) {
 
-        if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger && !InputManager.Wand.GetControllerGrip())
+        if (!m_BimanualTape && !m_PaintingActive && m_wandTrigger && !InputManager.Wand.GetControllerGrip() && SketchControlsScript.m_Instance.IsFreepaintToolReady())
           BeginBimanualTape();
 
         m_PaintingActive = !m_EatInput && !m_ToolHidden && (m_brushTrigger || (m_PaintingActive && !m_RevolverActive && m_LazyInputActive && m_BimanualTape && m_wandTrigger));
@@ -142,7 +142,11 @@ namespace TiltBrush {
           m_GridSnapActive = false;
 
         if (m_BimanualTape) {
-          if (!m_wandTrigger && !m_brushTrigger)
+          if (InputManager.m_Instance.GetCommandDown(InputManager.SketchCommands.ShowPinCushion)) {
+						EndBimanualTape();
+            SketchSurfacePanel.m_Instance.EnableSpecificTool(ToolType.DraftingTool);
+          }
+          else if (!m_wandTrigger && !m_brushTrigger)
             EndBimanualTape();
           else {
             UpdateBimanualGuideLineT();

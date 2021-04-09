@@ -877,6 +877,18 @@ namespace TiltBrush {
       VideoRecorderUtils.SerializerNewUsdFrame();
     }
 
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    public bool IsFreepaintToolReady() {
+      return
+        !m_PinCushion.IsShowing() &&
+        !PointerManager.m_Instance.IsStraightEdgeProxyActive() &&
+        !InputManager.m_Instance.ControllersAreSwapping() &&
+        (m_SketchSurfacePanel.IsSketchSurfaceToolActive() ||
+        (m_SketchSurfacePanel.GetCurrentToolType() == BaseTool.ToolType.FreePaintTool))
+        ;
+    }
+#endif
+
     public void UpdateControls() {
       UnityEngine.Profiling.Profiler.BeginSample("SketchControlsScript.UpdateControls");
       m_SketchSurfacePanel.m_UpdatedToolThisFrame = false;
@@ -960,12 +972,16 @@ namespace TiltBrush {
             m_SketchSurfacePanel.AllowDrawing(m_InputStateConfigs[(int)m_CurrentInputState].m_AllowDrawing);
             m_SketchSurfacePanel.UpdateCurrentTool();
 
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+            PointerManager.m_Instance.AllowPointerPreviewLine(IsFreepaintToolReady());
+#else
             PointerManager.m_Instance.AllowPointerPreviewLine(
                 !m_PinCushion.IsShowing() &&
                 !PointerManager.m_Instance.IsStraightEdgeProxyActive() &&
                 !InputManager.m_Instance.ControllersAreSwapping() &&
                 (m_SketchSurfacePanel.IsSketchSurfaceToolActive() ||
                  (m_SketchSurfacePanel.GetCurrentToolType() == BaseTool.ToolType.FreePaintTool)));
+#endif
 
             //keep transform gizmo at sketch surface pos
             m_TransformGizmo.transform.position = m_SketchSurface.transform.position;
@@ -1038,27 +1054,27 @@ namespace TiltBrush {
 
     void UpdatePinCushionVisibility() {
       // If the pin cushion is showing and the user cancels, eat the input.
-      if (m_PinCushion.IsShowing()) {
-        if (InputManager.m_Instance.GetCommand(InputManager.SketchCommands.Activate) ||
-            InputManager.Brush.GetControllerGrip() ||
-            InputManager.Wand.GetControllerGrip() ||
-            IsUserInteractingWithAnyWidget() ||
-            IsUserInteractingWithUI()) {
-          m_EatPinCushionInput = true;
-        }
-      }
+      // Note: These checks are redundant because CanUsePinCushion() deals with it already.
+      // if (m_PinCushion.IsShowing()) {
+      //   if (InputManager.m_Instance.GetCommand(InputManager.SketchCommands.Activate) ||
+      //       InputManager.Brush.GetControllerGrip() ||
+      //       InputManager.Wand.GetControllerGrip() ||
+      //       IsUserInteractingWithAnyWidget() ||
+      //       IsUserInteractingWithUI()) {
+      //     m_EatPinCushionInput = true;
+      //   }
+      // }
 
       // If our tool wants the input blocked, maintain the input eat state until
       // after the user has let off input.
-      if (m_SketchSurfacePanel.ActiveTool.BlockPinCushion()) {
+      if (m_SketchSurfacePanel.ActiveTool.BlockPinCushion() || !CanUsePinCushion()) {
         m_EatPinCushionInput = true;
       }
 
-      bool inputValid =
+      bool show =
           InputManager.m_Instance.GetCommand(InputManager.SketchCommands.ShowPinCushion);
-      bool show = inputValid && CanUsePinCushion();
       m_PinCushion.ShowPinCushion(show && !m_EatPinCushionInput);
-      m_EatPinCushionInput = m_EatPinCushionInput && inputValid;
+      m_EatPinCushionInput = m_EatPinCushionInput && show;
     }
 
     bool CanUsePinCushion() {

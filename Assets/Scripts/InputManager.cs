@@ -691,9 +691,14 @@ public class InputManager : MonoBehaviour {
       return HasSwapGestureCompleted();
     case SketchCommands.AltActivate:
       return GetMouseButtonDown(1) || Wand.GetCommandDown(rCommand);
-    }
 
-    return false;
+#if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
+    case SketchCommands.ShowPinCushion:
+      return Brush.GetCommandDown(rCommand);
+#endif
+      }
+
+          return false;
   }
 
   private bool HasSwapGestureCompleted() {

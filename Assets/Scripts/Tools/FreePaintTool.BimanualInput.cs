@@ -192,7 +192,9 @@ namespace TiltBrush {
     }
 
 
-
+    public override bool BlockPinCushion() {
+      return m_BimanualTape;
+    }
 
     void ApplyBimanualTape(ref Vector3 pos, ref Quaternion rot) {
       if (m_GridSnapActive) {
