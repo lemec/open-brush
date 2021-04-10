@@ -5,6 +5,8 @@ namespace TiltBrush {
   public partial class DraftingTool : BaseTool {
 #if (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
 
+    public static DraftingTool m_Instance { get; private set; }
+
     public bool m_brushTrigger { get; private set; }
     public bool m_brushTriggerDown { get; private set; }
     public bool m_wandTrigger { get; private set; }
@@ -22,6 +24,14 @@ namespace TiltBrush {
 
     public float m_brushTriggerRatio { get; private set; }
     public float m_wandTriggerRatio { get; private set; }
+
+    [SerializeField]
+    private GrabWidget MarkerPointPrefab;
+
+    [SerializeField]
+    private Transform m_cursorTransform;
+
+    private bool m_GridSnapActive;
 
     public override bool BlockPinCushion() {
       return m_brushTrigger || m_wandTrigger;
@@ -54,12 +64,40 @@ namespace TiltBrush {
       }
 
       m_brushUndoButtonHeld = m_brushUndoButtonTapInvalid && m_brushUndoButton;
+
+      bool depthGuideVisible = DepthGuide.m_instance && DepthGuide.m_instance.isActiveAndEnabled;
+
+      m_GridSnapActive = depthGuideVisible && m_brushUndoButtonHeld;
+
+    }
+
+    public override void EnableTool(bool bEnable) {
+      base.EnableTool(bEnable);
+
+      if (bEnable) {
+        m_Instance = this;
+      }
     }
 
     public override void UpdateTool() {
       UpdateInputs();
 
       base.UpdateTool();
+
+      Vector3 cursorPos = InputManager.m_Instance.GetBrushControllerAttachPoint().position;
+      m_cursorTransform.position = m_GridSnapActive ? FreePaintTool.SnapToGrid(cursorPos) : cursorPos;
+
+      if (m_brushTriggerDown)
+        AddMarkerPoint(m_cursorTransform);
+    }
+
+    public static void AddMarkerPoint(Transform transform) {
+      SketchMemoryScript.m_Instance.PerformAndRecordCommand(
+        new CreateWidgetCommand(m_Instance.MarkerPointPrefab, TrTransform.FromTransform(transform))
+        );
+      // SketchControlsScript.m_Instance.EatGazeObjectInput();
+      // SelectionManager.m_Instance.RemoveFromSelection(false);
+
     }
 
 #endif // (UNITY_EDITOR || EXPERIMENTAL_ENABLED)
