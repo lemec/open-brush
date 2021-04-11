@@ -41,7 +41,7 @@
 * The direction and rate of spin is dependent on the direction you move the joystick during a brushstroke.
 * During a brushstroke, You can stop the auto-spin by touching the joystick while leaving it centered.
 
-## Batch Filter
+### Batch Filter
 
 * The Batch Filter is useful for selecting or deleting overlapping brush strokes from different brush types.
 
@@ -51,3 +51,29 @@
 1. Carefully hit a brushstroke with your selection/eraser tool
 1. As long as you continue to hold down the Brush Trigger, only brushstrokes made with that same brush will be affected by that tool.
 1. Releasing the Brush Trigger will make your selection/eraser tool behave normally again.
+
+### Visor Gestures Framework
+
+* The Visor Gestures Framework allows the user to invoke gestures that involve interactions between the visor and one or both controllers.
+* There are 4 bilaterally symmetrical zones on the visor, for a total of 8. For the left outer side, there is a single large region. The left inner region is divided into top, middle and bottom sections. This arrangement is mirrored to the right.
+* The wand's trigger can be used to start a "grip" operation in one zone that ends with a "drag" in another zone.
+
+1. Toggle the Topography Display Orb by first placing the wand in the left outer region and holding down the trigger.
+2. Drag the wand to any of the regions on the right side and release the trigger.
+
+### Topography Orb Display (TOD)
+
+* The TOD's purpose is to provide a visually-enhanced display of the surface topology of surfaces, most notably in poor lighting or shading situations.
+* The TOD only works when a surface contributes to the camera's depth map, which may not occur with some unlit shaders.
+* When activated, the TOD appears as a spherical region centered on the brush. (See Visor Gestures for toggle instructions)
+* Within this spherical region, there are several overlapping visual effects:
+** a depth-fog effect
+** an axially-aligned, zoom-adaptive laser grid
+** an axially-aligned gnomon and gimbal display
+** an x-ray "cursor speck"
+
+### Axial View Unlock
+
+* Normally the view is locked in the Y axis so that "up is always up"
+* You can toggle this lock during a view-grip by pressing the button on the controller indicated by the padlock.
+* Resetting your view will automatically turn this lock back on in case you forget this.
